@@ -745,10 +745,10 @@ function loop(ts) {
 // UPDATE
 // ═══════════════════════════════════════════════
 
-const GRAVITY    = 900;   // lower = floatier, smoother arcs
+const GRAVITY    = 1100;  // pulls down faster, less floaty
 const MOVE_SPEED = 185;   // slightly snappier movement
-const JUMP_FORCE = 560;   // base jump: ~175px; full hold: ~340px
-const JUMP_HOLD  = 0.24;  // longer hold window for variable height
+const JUMP_FORCE = 460;   // base jump: ~96px; full hold: ~160px
+const JUMP_HOLD  = 0.15;  // shorter hold window
 
 function showAnnouncement(text, sub, color, duration) {
   announcement = { text, sub: sub || '', color: color || '#c9a84c', life: duration || 2.5, maxLife: duration || 2.5 };
