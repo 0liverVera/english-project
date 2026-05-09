@@ -505,6 +505,9 @@ let devroeTimer    = 0;   // countdown after devroe accepted
 let detectionFlash = 0;   // screen-flash alpha when caught
 let popups         = [];   // floating score text
 let lastDt         = 0;   // last frame dt, available to render
+let announcement   = null; // {text, sub, color, life, maxLife} — big centred message
+let dangerTimer    = 0;   // seconds Ross has been in a guard's danger zone
+let eliminated     = false; // shows ELIMINATED text before death screen
 
 // camera
 let camX = 0;
@@ -587,7 +590,8 @@ function startLevel() {
   G.paused  = false;
   G.devroeShown = false;
   levelStart = performance.now();
-  hintStart  = (performance.now() - t0) / 1000; // world-time when level starts
+  hintStart  = (performance.now() - t0) / 1000;
+  showAnnouncement(level.objective.toUpperCase(), level.name, '#c9a84c', 2.8);
   lastTime   = performance.now();
   requestAnimationFrame(loop);
 }
@@ -603,6 +607,9 @@ function initLevelObjects() {
   devroeTimer    = 0;
   detectionFlash = 0;
   popups         = [];
+  announcement   = null;
+  dangerTimer    = 0;
+  eliminated     = false;
   camX           = 0;
 
   // Ross
@@ -739,6 +746,10 @@ const MOVE_SPEED = 160;
 const JUMP_FORCE = 480;
 const JUMP_HOLD  = 0.18; // seconds extra hold boosts jump
 
+function showAnnouncement(text, sub, color, duration) {
+  announcement = { text, sub: sub || '', color: color || '#c9a84c', life: duration || 2.5, maxLife: duration || 2.5 };
+}
+
 function update(dt) {
   if (!ross.alive) return;
 
@@ -748,6 +759,7 @@ function update(dt) {
   updateSearchlights(dt);
   updateSmoke(dt);
   updateDevroe();
+  updateDangerProximity(dt);
   checkLoot();
   checkExit();
   checkGuardContact();
@@ -755,6 +767,33 @@ function update(dt) {
   // camera follows ross in world units, accounting for scale
   const viewW = W / SCALE;
   camX = Math.max(0, Math.min(WORLD_W - viewW, ross.x - viewW / 2 + ross.w / 2));
+}
+
+function updateDangerProximity(dt) {
+  if (smokeActive || devroeTimer > 0) { dangerTimer = 0; return; }
+
+  // Check if any alert guard is within danger range of Ross
+  let inDanger = false;
+  for (const g of guards) {
+    if (g.state !== 'alert') continue;
+    const dx = (ross.x + ross.w / 2) - (g.x + g.w / 2);
+    const dy = (ross.y + ross.h / 2) - (g.y + g.h / 2);
+    if (Math.sqrt(dx * dx + dy * dy) < g.visionRange + 40) {
+      inDanger = true;
+      break;
+    }
+  }
+
+  if (inDanger) {
+    dangerTimer += dt;
+    if (dangerTimer >= 5) {
+      dangerTimer = 0;
+      triggerDeath();
+    }
+  } else {
+    // recover faster than it builds so brief escapes help
+    dangerTimer = Math.max(0, dangerTimer - dt * 2);
+  }
 }
 
 function updateRoss(dt) {
@@ -996,6 +1035,7 @@ function checkLoot() {
     G.score += 200;
     spawnPopup(ross.x, ross.y - 10, '+200  LOOT SECURED');
     detectObjChange();
+    showAnnouncement('REACH THE EXIT', level.objectiveAfter, '#4cff6a', 2.5);
   }
   // bonus loot
   for (const b of bonusItems) {
@@ -1040,26 +1080,35 @@ function checkGuardContact() {
 // ═══════════════════════════════════════════════
 
 function triggerDeath() {
-  if (!ross.alive) return;
-  ross.alive = false;
-  G.lives--;
-  G.running = false;
+  if (!ross.alive || eliminated) return;
+  ross.alive  = false;
+  eliminated  = true;
   ghostStatus = false;
+  G.lives--;
+  dangerTimer = 0;
 
-  if (G.lives <= 0) {
-    showHUD(false);
-    document.getElementById('go-score').textContent = G.score;
-    showScreen('s-gameover');
-    return;
-  }
+  // Phase 1: show ELIMINATED text over the canvas for 1.5s (game still renders, just paused)
+  G.paused = true;
+  showAnnouncement('ELIMINATED', G.lives > 0 ? G.lives + ' lives remaining' : 'GAME OVER', '#c0392b', 1.8);
 
-  document.getElementById('death-lives').textContent =
-    '🕵️'.repeat(G.lives) + ' Lives remaining';
-  showScreen('s-death');
   setTimeout(() => {
-    showScreen('');
-    respawn();
-  }, 2000);
+    G.paused  = false;
+    G.running = false;
+    eliminated = false;
+    announcement = null;
+
+    if (G.lives <= 0) {
+      showHUD(false);
+      document.getElementById('go-score').textContent = G.score;
+      showScreen('s-gameover');
+      return;
+    }
+
+    document.getElementById('death-lives').textContent =
+      '🕵️'.repeat(G.lives) + ' lives remaining';
+    showScreen('s-death');
+    setTimeout(() => { showScreen(''); respawn(); }, 1800);
+  }, 1800);
 }
 
 function respawn() {
@@ -1206,6 +1255,8 @@ function render() {
   drawArrowIndicators(t);   // directional arrows to loot / exit
   drawObjectiveBanner(t);   // bottom strip showing where to go
   drawDetectionFlash();
+  drawDangerTimer();        // countdown ring when guard is chasing
+  drawAnnouncement();       // big centred text (objective, eliminated, etc.)
   drawControlsHint(t);
 }
 
@@ -1720,8 +1771,124 @@ function drawObjectiveBanner(t) {
 }
 
 function detectObjChange() {
-  // called from checkLoot after loot is picked up to trigger banner flash
   objFlash = 1.5;
+}
+
+// ═══════════════════════════════════════════════
+// ANNOUNCEMENT — big centred text
+// ═══════════════════════════════════════════════
+
+function drawAnnouncement() {
+  if (!announcement) return;
+  announcement.life -= lastDt;
+  if (announcement.life <= 0) { announcement = null; return; }
+
+  const p = announcement.life / announcement.maxLife; // 1→0 as time passes
+  // fade in for first 15% of life, hold, fade out for last 25%
+  let alpha;
+  if (p > 0.85)      alpha = (1 - p) / 0.15;   // fade in
+  else if (p < 0.25) alpha = p / 0.25;           // fade out
+  else               alpha = 1;
+
+  const isElim = announcement.text === 'ELIMINATED';
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = alpha;
+
+  // dark vignette backdrop so text always readable
+  const vgrd = ctx.createRadialGradient(W/2, H/2, 40, W/2, H/2, W * 0.55);
+  vgrd.addColorStop(0, 'rgba(8,8,12,0.72)');
+  vgrd.addColorStop(1, 'rgba(8,8,12,0)');
+  ctx.fillStyle = vgrd;
+  ctx.fillRect(0, 0, W, H);
+
+  // thin gold/crimson horizontal rule
+  const ruleColor = isElim ? '#8b1a1a' : announcement.color;
+  ctx.fillStyle = ruleColor;
+  ctx.globalAlpha = alpha * 0.6;
+  ctx.fillRect(W * 0.2, H/2 - 46, W * 0.6, 1);
+  ctx.fillRect(W * 0.2, H/2 + 28, W * 0.6, 1);
+  ctx.globalAlpha = alpha;
+
+  // main text
+  const fontSize = Math.round(Math.min(W / 10, 64));
+  ctx.font = `900 ${fontSize}px Cinzel, serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = announcement.color;
+  ctx.shadowColor = announcement.color;
+  ctx.shadowBlur  = isElim ? 40 : 24;
+  ctx.fillText(announcement.text, W / 2, H / 2 + 12);
+
+  // sub text
+  if (announcement.sub) {
+    ctx.shadowBlur = 6;
+    ctx.font = `${Math.round(fontSize * 0.32)}px Cinzel, serif`;
+    ctx.fillStyle = isElim ? '#e8e6df' : 'rgba(232,230,223,0.85)';
+    ctx.fillText(announcement.sub.toUpperCase(), W / 2, H / 2 + fontSize * 0.7);
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════
+// DANGER TIMER — ring countdown
+// ═══════════════════════════════════════════════
+
+function drawDangerTimer() {
+  if (dangerTimer <= 0) return;
+
+  const progress  = dangerTimer / 5;          // 0→1
+  const remaining = Math.ceil(5 - dangerTimer);
+  const pulse     = 0.7 + 0.3 * Math.sin((performance.now() / 1000) * 8);
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.07;
+
+  // dim vignette that intensifies with danger
+  const vAlpha = progress * 0.35;
+  ctx.fillStyle = `rgba(139,26,26,${vAlpha})`;
+  ctx.fillRect(0, 0, W, H);
+
+  // outer ring (depletes clockwise)
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(139,26,26,0.3)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // active arc — green when safe, red when danger
+  const arcColor = progress < 0.5
+    ? `rgba(255,${Math.round(180 - progress * 280)},60,${pulse})`
+    : `rgba(255,${Math.round(60 - (progress - 0.5) * 120)},40,${pulse})`;
+  ctx.strokeStyle = arcColor;
+  ctx.lineWidth   = 5;
+  ctx.lineCap     = 'round';
+  ctx.beginPath();
+  // arc drains as dangerTimer rises
+  ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + (1 - progress) * Math.PI * 2);
+  ctx.stroke();
+
+  // countdown number
+  ctx.font     = `bold ${Math.round(radius * 1.1)}px Cinzel, serif`;
+  ctx.fillStyle = arcColor;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = arcColor;
+  ctx.shadowBlur  = 12;
+  ctx.fillText(remaining, cx, cy + radius * 0.38);
+
+  // "DANGER" label below ring
+  ctx.shadowBlur  = 0;
+  ctx.font        = `bold ${Math.round(radius * 0.38)}px Cinzel, serif`;
+  ctx.fillStyle   = `rgba(255,80,60,${pulse * 0.9})`;
+  ctx.fillText('DANGER', cx, cy + radius + 20);
+
+  ctx.restore();
 }
 
 function drawDetectionFlash() {
