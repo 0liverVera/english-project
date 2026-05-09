@@ -336,54 +336,58 @@ const LEVEL_DEFS = [
     bgColor: '#08080e',
     platforms: [
       // ground floor
-      {x:0,   y:520, w:2400, h:80, col:'#0d0d18'},
-      // floor 2 ceiling/floor slab
-      {x:0,   y:280, w:2400, h:20, col:'#111128'},
-      // floor 1 mid platforms
-      {x:180, y:420, w:160,  h:18, col:'#14142a'},
-      {x:500, y:380, w:180,  h:18, col:'#14142a'},
-      {x:800, y:430, w:160,  h:18, col:'#14142a'},
-      {x:1100,y:390, w:200,  h:18, col:'#14142a'},
-      {x:1400,y:440, w:160,  h:18, col:'#14142a'},
-      {x:1700,y:400, w:180,  h:18, col:'#14142a'},
-      {x:2000,y:450, w:160,  h:18, col:'#14142a'},
-      // stairs/ladder zone (thin steps)
-      {x:1140,y:460, w:40,   h:18, col:'#1e1e3a'},
-      {x:1140,y:400, w:40,   h:18, col:'#1e1e3a'},
-      {x:1140,y:340, w:40,   h:18, col:'#1e1e3a'},
-      {x:1140,y:298, w:40,   h:18, col:'#1e1e3a'},
-      // floor 2 platforms
-      {x:0,   y:180, w:500,  h:18, col:'#14142a'},
-      {x:600, y:200, w:180,  h:18, col:'#14142a'},
-      {x:860, y:180, w:220,  h:18, col:'#14142a'},
-      {x:1300,y:200, w:180,  h:18, col:'#14142a'},
-      {x:1560,y:180, w:200,  h:18, col:'#14142a'},
-      {x:1840,y:200, w:180,  h:18, col:'#14142a'},
-      {x:2100,y:180, w:300,  h:18, col:'#14142a'},
+      {x:0,    y:520, w:2400, h:80,  col:'#0d0d18'},
+      // ── FLOOR 2 SLAB ── split into 3 sections, leaving two staircase gaps
+      // left section  x:20 → 380   |  gap x:380–700  |  mid x:700 → 1600  |  gap x:1600–1920  |  right x:1920 → 2380
+      {x:20,   y:280, w:360,  h:20,  col:'#111128'},
+      {x:700,  y:280, w:900,  h:20,  col:'#111128'},
+      {x:1920, y:280, w:460,  h:20,  col:'#111128'},
+      // ── LEFT STAIRCASE (gap x:380–700, ascends left→right) ──
+      {x:380,  y:456, w:110,  h:18,  col:'#1e1e3a'},
+      {x:395,  y:396, w:110,  h:18,  col:'#1e1e3a'},
+      {x:420,  y:336, w:110,  h:18,  col:'#1e1e3a'},
+      {x:450,  y:264, w:244,  h:18,  col:'#1e1e3a'},  // landing → drops onto middle slab at x:700
+      // ── RIGHT STAIRCASE (gap x:1600–1920, landing on left, ascends right) ──
+      {x:1606, y:264, w:308,  h:18,  col:'#1e1e3a'},  // landing → drops onto middle slab at x:1600
+      {x:1670, y:336, w:110,  h:18,  col:'#1e1e3a'},
+      {x:1700, y:396, w:110,  h:18,  col:'#1e1e3a'},
+      {x:1720, y:456, w:110,  h:18,  col:'#1e1e3a'},
+      // ── FLOOR 1 STEPPING STONES (extra movement on ground floor) ──
+      {x:180,  y:430, w:160,  h:18,  col:'#14142a'},
+      {x:950,  y:440, w:160,  h:18,  col:'#14142a'},
+      {x:1200, y:400, w:180,  h:18,  col:'#14142a'},
+      {x:2050, y:440, w:160,  h:18,  col:'#14142a'},
+      // ── FLOOR 2 UPPER PLATFORMS (bonus loot perches above slab) ──
+      {x:100,  y:190, w:200,  h:18,  col:'#14142a'},
+      {x:900,  y:190, w:200,  h:18,  col:'#14142a'},
+      {x:1500, y:190, w:160,  h:18,  col:'#14142a'},
+      {x:2050, y:190, w:200,  h:18,  col:'#14142a'},
       // walls
-      {x:0,   y:0,   w:20,   h:520,col:'#08080e'},
-      {x:2380,y:0,   w:20,   h:520,col:'#08080e'},
+      {x:0,    y:0,   w:20,   h:520, col:'#08080e'},
+      {x:2380, y:0,   w:20,   h:520, col:'#08080e'},
     ],
     guards: [
-      {x:300, y:490, patrolLeft:80,  patrolRight:550, speed:55},
-      {x:900, y:490, patrolLeft:600, patrolRight:1100,speed:65},
-      {x:1800,y:490, patrolLeft:1500,patrolRight:2100,speed:60},
-      {x:400, y:250, patrolLeft:80,  patrolRight:700, speed:70},
-      {x:1700,y:250, patrolLeft:1300,patrolRight:2100,speed:75},
+      // floor 1 (y:490 so feet sit on ground at y:520)
+      {x:200,  y:490, patrolLeft:30,   patrolRight:370,  speed:55},
+      {x:1050, y:490, patrolLeft:700,  patrolRight:1590, speed:65},
+      {x:2100, y:490, patrolLeft:1920, patrolRight:2360, speed:60},
+      // floor 2 (y:248 so feet sit on slab top at y:280)
+      {x:200,  y:248, patrolLeft:30,   patrolRight:685,  speed:70},
+      {x:1100, y:248, patrolLeft:710,  patrolRight:1590, speed:75},
     ],
-    loot: {x:1200, y:245, label:'📜'},
+    loot: {x:2100, y:245, label:'📜'},
     bonusLoot:[
-      {x:650,  y:165, label:'💍', pts:50},
-      {x:1900, y:165, label:'💍', pts:50},
+      {x:150,  y:155, label:'💍', pts:50},
+      {x:2055, y:155, label:'💍', pts:50},
     ],
     exit: {x:30, y:460},
     rossStart: {x:60, y:490},
-    noelia: {x:2300, y:250, patrolTarget:1200, speed:85},
+    noelia: {x:2340, y:248, patrolTarget:2100, speed:85},
     devroe: true,
     devroeFloor: 2, // triggers when ross reaches y < 300
     searchlights: [
-      {x:700, y:280, angle:0, speed:0.6, range:180, width:40},
-      {x:1600,y:280, angle:Math.PI, speed:0.7, range:180, width:40},
+      {x:200,  y:280, angle:0,        speed:0.6, range:180, width:40},
+      {x:1200, y:280, angle:Math.PI,  speed:0.7, range:180, width:40},
     ],
     lasers: [],
   },
@@ -741,10 +745,10 @@ function loop(ts) {
 // UPDATE
 // ═══════════════════════════════════════════════
 
-const GRAVITY    = 1400;
-const MOVE_SPEED = 160;
-const JUMP_FORCE = 480;
-const JUMP_HOLD  = 0.18; // seconds extra hold boosts jump
+const GRAVITY    = 900;   // lower = floatier, smoother arcs
+const MOVE_SPEED = 185;   // slightly snappier movement
+const JUMP_FORCE = 560;   // base jump: ~175px; full hold: ~340px
+const JUMP_HOLD  = 0.24;  // longer hold window for variable height
 
 function showAnnouncement(text, sub, color, duration) {
   announcement = { text, sub: sub || '', color: color || '#c9a84c', life: duration || 2.5, maxLife: duration || 2.5 };
