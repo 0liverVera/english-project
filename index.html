@@ -910,6 +910,7 @@ function updateNoelia(dt) {
     exitPoint.active = true;
     G.score += 100;
     spawnPopup(ross.x, ross.y - 10, '+100  STOLEN BACK!', '#e87020');
+    detectObjChange();
   }
 }
 
@@ -994,6 +995,7 @@ function checkLoot() {
     exitPoint.active = true;
     G.score += 200;
     spawnPopup(ross.x, ross.y - 10, '+200  LOOT SECURED');
+    detectObjChange();
   }
   // bonus loot
   for (const b of bonusItems) {
@@ -1178,12 +1180,11 @@ function render() {
 
   const t = (performance.now() - t0) / 1000;
 
-  // background
-  ctx.fillStyle = level.bgColor || '#0a0a0f';
-  ctx.fillRect(0, 0, W, H);
+  // ── BACKGROUND (screen-space, before world transform) ──
+  drawBackground(t);
 
+  // ── WORLD (scaled + camera offset) ──
   ctx.save();
-  // uniform scale: world 2400x600 → canvas, camera offset in world units
   ctx.scale(SCALE, SCALE);
   ctx.translate(-camX, 0);
 
@@ -1199,21 +1200,39 @@ function render() {
   drawSmoke(t);
   drawPopups(t);
 
-  ctx.restore(); // end world-space transform
+  ctx.restore(); // end world-space
 
-  // screen-space overlays drawn after restore
+  // ── SCREEN-SPACE OVERLAYS ──
+  drawArrowIndicators(t);   // directional arrows to loot / exit
+  drawObjectiveBanner(t);   // bottom strip showing where to go
   drawDetectionFlash();
   drawControlsHint(t);
 }
 
 function drawPlatforms() {
   for (const p of level.platforms) {
-    // base fill
+    // base
     ctx.fillStyle = p.col;
     ctx.fillRect(p.x, p.y, p.w, p.h);
-    // gold top edge highlight
-    ctx.fillStyle = 'rgba(201,168,76,0.25)';
+    // subtle inner gradient shine (lighter on top half)
+    const grd = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+    grd.addColorStop(0, 'rgba(255,255,255,0.06)');
+    grd.addColorStop(1, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    // gold top edge
+    ctx.fillStyle = 'rgba(201,168,76,0.55)';
     ctx.fillRect(p.x, p.y, p.w, 2);
+    // dark bottom edge shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(p.x, p.y + p.h - 2, p.w, 2);
+    // small notch lines for texture (every 40px on wide platforms)
+    if (p.w > 80) {
+      ctx.fillStyle = 'rgba(201,168,76,0.08)';
+      for (let nx = p.x + 40; nx < p.x + p.w - 10; nx += 40) {
+        ctx.fillRect(nx, p.y, 1, p.h);
+      }
+    }
   }
 }
 
@@ -1245,17 +1264,64 @@ function drawBonusLoot(t) {
 }
 
 function drawExit(t) {
-  if (!exitPoint.active) return;
-  const pulse = 0.4 + 0.6 * Math.abs(Math.sin(t * 3));
+  const ex = exitPoint;
+  const cx = ex.x + ex.w / 2;
+  const pulse = 0.5 + 0.5 * Math.abs(Math.sin(t * 2.5));
+
+  if (!ex.active) {
+    // Faint locked marker so player can see where to go eventually
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = '#888';
+    ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
+    ctx.font = '11px Cinzel, serif';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText('EXIT', cx, ex.y - 4);
+    ctx.restore();
+    return;
+  }
+
   ctx.save();
+  // expanding ring beacon
+  for (let ring = 0; ring < 3; ring++) {
+    const rScale = ((t * 0.8 + ring * 0.33) % 1);
+    const rRadius = 30 + rScale * 50;
+    const rAlpha  = (1 - rScale) * 0.35;
+    ctx.beginPath();
+    ctx.arc(cx, ex.y + ex.h / 2, rRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(76,200,80,${rAlpha})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  // glowing pad
   ctx.shadowColor = '#4caf50';
-  ctx.shadowBlur  = 14 + pulse * 16;
-  ctx.fillStyle   = `rgba(76,175,80,${0.3 + pulse * 0.4})`;
-  ctx.fillRect(exitPoint.x, exitPoint.y - 10, exitPoint.w, exitPoint.h + 10);
-  ctx.fillStyle = '#4caf50';
-  ctx.font = '13px Cinzel, serif';
+  ctx.shadowBlur  = 20 + pulse * 24;
+  ctx.fillStyle   = `rgba(76,175,80,${0.25 + pulse * 0.35})`;
+  ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
+
+  // solid top stripe
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = `rgba(76,210,80,${0.7 + pulse * 0.3})`;
+  ctx.fillRect(ex.x, ex.y, ex.w, 3);
+
+  // "EXIT" label above
+  ctx.shadowColor = '#4caf50';
+  ctx.shadowBlur  = 10;
+  ctx.font = 'bold 13px Cinzel, serif';
+  ctx.fillStyle = '#5eff6a';
   ctx.textAlign = 'center';
-  ctx.fillText('EXIT', exitPoint.x + exitPoint.w/2, exitPoint.y - 4);
+  ctx.fillText('EXIT', cx, ex.y - 8);
+
+  // down-arrow chevron
+  ctx.fillStyle = `rgba(94,255,106,${0.6 + pulse * 0.4})`;
+  ctx.beginPath();
+  ctx.moveTo(cx,      ex.y - 18);
+  ctx.lineTo(cx - 7,  ex.y - 26);
+  ctx.lineTo(cx + 7,  ex.y - 26);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.restore();
 }
 
@@ -1347,6 +1413,315 @@ function drawNoelia(t) {
   ctx.font = '13px serif';
   ctx.textAlign = 'center';
   ctx.fillText(noelia.hasLoot ? '😏' : '👤', noelia.x + noelia.w/2, noelia.y - 20);
+}
+
+// ═══════════════════════════════════════════════
+// BACKGROUND
+// ═══════════════════════════════════════════════
+
+const BG_STARS = Array.from({length:90}, (_,i) => ({
+  x: (i * 2731) % 2400,
+  y: (i * 1847) % 400,
+  r: 0.6 + (i % 4) * 0.4,
+  twinkle: i * 0.7,
+}));
+
+function drawBackground(t) {
+  const idx = G.levelIdx;
+  const parallax = camX * 0.08; // slow background drift
+
+  // sky gradient
+  const skyColors = [
+    ['#110d06','#1c1408'],   // Nairobi — warm dark amber
+    ['#06060f','#0a0818'],   // Tokyo   — deep violet-blue
+    ['#040610','#07091a'],   // Monaco  — midnight navy
+  ];
+  const [top, bot] = skyColors[idx] || skyColors[0];
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, top);
+  sky.addColorStop(1, bot);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  // stars
+  const starTints = [
+    'rgba(255,210,150,', // Nairobi — warm
+    'rgba(160,160,255,', // Tokyo   — cool blue
+    'rgba(180,200,255,', // Monaco  — icy
+  ];
+  const tint = starTints[idx] || starTints[0];
+  for (const s of BG_STARS) {
+    const sx = ((s.x - parallax * 0.5) % W + W) % W;
+    const bright = 0.3 + 0.2 * Math.sin(t * 0.9 + s.twinkle);
+    ctx.beginPath();
+    ctx.arc(sx, s.y * (H / 400), s.r, 0, Math.PI * 2);
+    ctx.fillStyle = tint + bright + ')';
+    ctx.fill();
+  }
+
+  // level-specific atmosphere
+  if (idx === 0) drawBgNairobi(t, parallax);
+  else if (idx === 1) drawBgTokyo(t, parallax);
+  else               drawBgMonaco(t, parallax);
+}
+
+function drawBgNairobi(t, px) {
+  // distant estate wall silhouette
+  ctx.fillStyle = '#0e0a04';
+  const wallY = H * 0.62;
+  ctx.fillRect(0, wallY, W, H - wallY);
+
+  // acacia tree silhouettes
+  const trees = [0.08, 0.22, 0.45, 0.61, 0.78, 0.91];
+  for (const frac of trees) {
+    const tx = ((frac * W * 2 - px * 0.4) % (W + 120) + W + 120) % (W + 120) - 60;
+    const th = 60 + (frac * 1000 % 30);
+    const ty = wallY - th;
+    ctx.fillStyle = '#0b0804';
+    // trunk
+    ctx.fillRect(tx - 3, ty + th * 0.4, 6, th * 0.6);
+    // canopy (flat-topped acacia shape)
+    ctx.beginPath();
+    ctx.ellipse(tx, ty + th * 0.35, 28 + frac * 10, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // warm ambient glow along ground
+  const glow = ctx.createLinearGradient(0, wallY - 30, 0, wallY + 20);
+  glow.addColorStop(0, 'rgba(180,100,20,0.07)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, wallY - 30, W, 50);
+}
+
+function drawBgTokyo(t, px) {
+  const baseY = H * 0.55;
+  // building silhouettes — varying heights
+  const buildings = [
+    {f:0.04,w:60,h:180},{f:0.12,w:80,h:220},{f:0.22,w:50,h:140},
+    {f:0.32,w:90,h:260},{f:0.44,w:55,h:190},{f:0.54,w:70,h:230},
+    {f:0.66,w:85,h:200},{f:0.76,w:60,h:170},{f:0.86,w:95,h:250},
+    {f:0.95,w:50,h:160},
+  ];
+  for (const b of buildings) {
+    const bx = ((b.f * W * 2.2 - px * 0.55) % (W + 200) + W + 200) % (W + 200) - 100;
+    ctx.fillStyle = '#07071a';
+    ctx.fillRect(bx - b.w/2, baseY - b.h, b.w, b.h);
+    // random window lights
+    for (let wy = baseY - b.h + 10; wy < baseY - 10; wy += 16) {
+      for (let wx = bx - b.w/2 + 6; wx < bx + b.w/2 - 6; wx += 12) {
+        const on = Math.sin(wx * 0.3 + wy * 0.5 + t * 0.2) > 0.2;
+        if (!on) continue;
+        const col = Math.sin(wx + wy) > 0 ? 'rgba(255,180,80,0.55)' : 'rgba(120,160,255,0.5)';
+        ctx.fillStyle = col;
+        ctx.fillRect(wx, wy, 5, 6);
+      }
+    }
+  }
+  // neon glow streaks at street level
+  const neonColors = ['rgba(255,60,120,0.08)','rgba(60,120,255,0.07)','rgba(80,255,200,0.06)'];
+  for (let i = 0; i < 3; i++) {
+    const gx = ((i * 400 - px * 0.3) % (W + 200) + W + 200) % (W + 200) - 100;
+    ctx.fillStyle = neonColors[i % 3];
+    ctx.fillRect(gx, baseY - 6, 80, 12);
+  }
+  ctx.fillStyle = '#07071a';
+  ctx.fillRect(0, baseY, W, H - baseY);
+}
+
+function drawBgMonaco(t, px) {
+  const waterY = H * 0.72;
+  // cliff/building silhouettes
+  const cliffs = [
+    {f:0.0, w:140, h:160},{f:0.18,w:120,h:200},{f:0.38,w:160,h:140},
+    {f:0.58,w:100,h:180},{f:0.72,w:130,h:220},{f:0.88,w:110,h:150},
+  ];
+  for (const c of cliffs) {
+    const cx2 = ((c.f * W * 2 - px * 0.35) % (W + 250) + W + 250) % (W + 250) - 125;
+    ctx.fillStyle = '#060814';
+    ctx.fillRect(cx2 - c.w/2, waterY - c.h, c.w, c.h + 20);
+    // penthouse window lights
+    for (let i = 0; i < 4; i++) {
+      const wx = cx2 - c.w/3 + i * (c.w/5);
+      const wy = waterY - c.h + 12 + i * 20;
+      const lit = Math.sin(wx * 0.4 + t * 0.15 + i) > 0;
+      if (lit) {
+        ctx.fillStyle = 'rgba(255,210,120,0.5)';
+        ctx.fillRect(wx, wy, 6, 8);
+      }
+    }
+  }
+  // harbour water — animated shimmer
+  ctx.fillStyle = '#050810';
+  ctx.fillRect(0, waterY, W, H - waterY);
+  for (let i = 0; i < 20; i++) {
+    const wx = ((i * 137 - px * 0.2 + t * 15) % W + W) % W;
+    const wy = waterY + 6 + (i % 5) * 8;
+    const ww = 20 + (i % 4) * 15;
+    ctx.fillStyle = `rgba(80,120,180,${0.04 + 0.03 * Math.sin(t * 1.5 + i)})`;
+    ctx.fillRect(wx, wy, ww, 2);
+  }
+  // moon glow
+  const moonX = W * 0.8, moonY = H * 0.12;
+  const moonGlow = ctx.createRadialGradient(moonX, moonY, 2, moonX, moonY, 60);
+  moonGlow.addColorStop(0, 'rgba(200,220,255,0.18)');
+  moonGlow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.fillRect(moonX - 60, moonY - 60, 120, 120);
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, 8, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(220,230,255,0.7)';
+  ctx.fill();
+}
+
+// ═══════════════════════════════════════════════
+// DIRECTIONAL ARROW INDICATORS
+// ═══════════════════════════════════════════════
+
+function worldToScreen(wx, wy) {
+  return { x: (wx - camX) * SCALE, y: wy * SCALE };
+}
+
+function drawArrowIndicators(t) {
+  const pulse = 0.75 + 0.25 * Math.sin(t * 4);
+  if (!hasLoot && !lootItem.collected) {
+    // Point to loot
+    const lx = lootItem.x + 12, ly = lootItem.y + 12;
+    drawArrow(lx, ly, '#c9a84c', level.loot.label + ' LOOT', pulse, t);
+  } else if (exitPoint.active) {
+    // Point to exit
+    const ex = exitPoint.x + exitPoint.w/2, ey = exitPoint.y + exitPoint.h/2;
+    drawArrow(ex, ey, '#4cff6a', 'EXIT', pulse, t);
+  }
+  // Noelia warning if she has loot
+  if (noelia && noelia.hasLoot) {
+    drawArrow(noelia.x + 10, noelia.y, '#e87020', 'NOELIA HAS IT', pulse, t);
+  }
+}
+
+function drawArrow(worldX, worldY, color, label, pulse, t) {
+  const sc = worldToScreen(worldX, worldY);
+  const margin = 52;
+  const onScreen = sc.x > margin && sc.x < W - margin && sc.y > margin && sc.y < H - margin;
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  if (onScreen) {
+    // target is visible — draw pulsing ring around it
+    ctx.beginPath();
+    ctx.arc(sc.x, sc.y, 18 + pulse * 8, 0, Math.PI * 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = pulse * 0.85;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  } else {
+    // target is off-screen — draw edge arrow
+    const cx = W / 2, cy = H / 2;
+    const dx = sc.x - cx, dy = sc.y - cy;
+    const angle = Math.atan2(dy, dx);
+    const halfW = W / 2 - margin, halfH = H / 2 - margin;
+    const scale_t = Math.min(Math.abs(halfW / (dx || 0.0001)), Math.abs(halfH / (dy || 0.0001)));
+    let ax = cx + dx * scale_t;
+    let ay = cy + dy * scale_t;
+    ax = Math.max(margin, Math.min(W - margin, ax));
+    ay = Math.max(margin, Math.min(H - margin, ay));
+
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(angle);
+    ctx.globalAlpha = pulse;
+
+    // arrow background pill
+    ctx.fillStyle = 'rgba(10,10,15,0.75)';
+    ctx.beginPath();
+    ctx.roundRect(-30, -14, 60, 28, 6);
+    ctx.fill();
+
+    // arrow triangle
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(22, 0);
+    ctx.lineTo(10, -7);
+    ctx.lineTo(10, 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // distance label (rotated back to readable)
+    ctx.rotate(-angle);
+    const dist = Math.round(Math.abs(worldX - (ross.x + ross.w/2)));
+    ctx.font = 'bold 9px Cinzel, serif';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.fillText(dist + 'px', 0, 4);
+
+    ctx.restore();
+
+    // label below the arrow
+    ctx.font = 'bold 10px Cinzel, serif';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = pulse * 0.9;
+    ctx.fillText(label, ax, ay + 26);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════
+// OBJECTIVE BANNER (bottom strip)
+// ═══════════════════════════════════════════════
+
+let objFlash = 0; // flashes when objective changes
+
+function drawObjectiveBanner(t) {
+  if (objFlash > 0) objFlash -= lastDt;
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  const bh = 36, by = H - bh;
+  // semi-transparent strip
+  ctx.fillStyle = 'rgba(10,10,15,0.78)';
+  ctx.fillRect(0, by, W, bh);
+  // gold top border
+  ctx.fillStyle = objFlash > 0
+    ? `rgba(76,255,100,${Math.min(1, objFlash)})` // green flash on objective change
+    : 'rgba(201,168,76,0.35)';
+  ctx.fillRect(0, by, W, 1);
+
+  // objective text
+  const obj = hasLoot ? level.objectiveAfter : level.objective;
+  const targetWX = hasLoot ? exitPoint.x + exitPoint.w/2 : lootItem.x + 12;
+  const screenTargetX = (targetWX - camX) * SCALE;
+  const dirArrow = screenTargetX > W / 2 + 40 ? '→' : screenTargetX < W / 2 - 40 ? '←' : '↓';
+  const col = hasLoot ? '#4cff6a' : '#c9a84c';
+
+  ctx.font = 'bold 12px Cinzel, serif';
+  ctx.fillStyle = col;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${dirArrow}  ${obj}  ${dirArrow}`, W / 2, by + 23);
+
+  // left: level name, right: ghost status
+  ctx.font = '10px Cinzel, serif';
+  ctx.fillStyle = 'rgba(154,149,133,0.7)';
+  ctx.textAlign = 'left';
+  ctx.fillText(level.name.toUpperCase(), 16, by + 23);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = ghostStatus ? 'rgba(76,175,80,0.8)' : 'rgba(154,149,133,0.4)';
+  ctx.fillText(ghostStatus ? '◆ GHOST RUN' : '◇ SPOTTED', W - 16, by + 23);
+
+  ctx.restore();
+}
+
+function detectObjChange() {
+  // called from checkLoot after loot is picked up to trigger banner flash
+  objFlash = 1.5;
 }
 
 function drawDetectionFlash() {
