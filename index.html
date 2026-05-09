@@ -456,7 +456,7 @@ const LEVEL_DEFS = [
     ],
     exit: {x:2320, y:460},
     rossStart: {x:80, y:490},
-    noelia: {x:2300, y:130, patrolTarget:2100, speed:90},
+    noelia: {x:2300, y:130, patrolTarget:2100, speed:90, startDelay:4},
     devroe: true,
     devroeFloor: 2,
     searchlights: [
@@ -494,14 +494,17 @@ let noelia     = null;
 let searchlights = [];
 let lasers     = [];
 
-let smokeBombs   = 2;
-let ghostStatus  = true;
-let levelStart   = 0;
-let hasLoot      = false;
-let levelScore   = 0;
-let smokeActive  = false;
-let smokeTimer   = 0;
-let devroeTimer  = 0; // countdown after accepted
+let smokeBombs     = 2;
+let ghostStatus    = true;
+let levelStart     = 0;
+let hasLoot        = false;
+let levelScore     = 0;
+let smokeActive    = false;
+let smokeTimer     = 0;
+let devroeTimer    = 0;   // countdown after devroe accepted
+let detectionFlash = 0;   // screen-flash alpha when caught
+let popups         = [];   // floating score text
+let lastDt         = 0;   // last frame dt, available to render
 
 // camera
 let camX = 0;
@@ -591,14 +594,16 @@ function startLevel() {
 
 function initLevelObjects() {
   level = LEVEL_DEFS[G.levelIdx];
-  smokeBombs  = level.smokeBombs;
-  ghostStatus = true;
-  hasLoot     = false;
-  levelScore  = 0;
-  smokeActive = false;
-  smokeTimer  = 0;
-  devroeTimer = 0;
-  camX        = 0;
+  smokeBombs     = level.smokeBombs;
+  ghostStatus    = true;
+  hasLoot        = false;
+  levelScore     = 0;
+  smokeActive    = false;
+  smokeTimer     = 0;
+  devroeTimer    = 0;
+  detectionFlash = 0;
+  popups         = [];
+  camX           = 0;
 
   // Ross
   const rs = level.rossStart;
@@ -651,12 +656,10 @@ function initLevelObjects() {
     noelia = {
       x: nd.x, y: nd.y,
       w: 20, h: 32,
-      vx: 0, vy: 0,
-      onGround: false,
       target: nd.patrolTarget,
       speed: nd.speed,
       hasLoot: false,
-      state: 'chase', // chase | returning
+      startDelay: nd.startDelay || 0,
     };
   }
 
@@ -684,23 +687,24 @@ function aabb(a, b) {
 
 function platformCollide(entity) {
   entity.onGround = false;
-  const plats = level.platforms;
-  for (const p of plats) {
+  for (const p of level.platforms) {
     if (!aabb(entity, p)) continue;
     const overlapX = Math.min(entity.x + entity.w, p.x + p.w) - Math.max(entity.x, p.x);
     const overlapY = Math.min(entity.y + entity.h, p.y + p.h) - Math.max(entity.y, p.y);
-    if (overlapX > overlapY) {
-      if (entity.vy >= 0 && entity.y + entity.h - entity.vy <= p.y + 2) {
-        entity.y = p.y - entity.h;
-        entity.vy = 0;
+    if (overlapY <= overlapX) {
+      // vertical resolution — push out top or bottom
+      if (entity.vy >= 0) {
+        entity.y      = p.y - entity.h;
+        entity.vy     = 0;
         entity.onGround = true;
-      } else if (entity.vy < 0) {
-        entity.y = p.y + p.h;
+      } else {
+        entity.y  = p.y + p.h;
         entity.vy = 0;
       }
     } else {
+      // horizontal resolution — push out left or right
       if (entity.vx > 0) entity.x = p.x - entity.w;
-      else                entity.x = p.x + p.w;
+      else               entity.x = p.x + p.w;
       entity.vx = 0;
     }
   }
@@ -716,6 +720,7 @@ function loop(ts) {
   if (!G.running) return;
   const dt = Math.min((ts - lastTime) / 1000, 0.05);
   lastTime = ts;
+  lastDt   = dt;
 
   if (!G.paused) {
     update(dt);
@@ -814,12 +819,12 @@ function updateGuards(dt) {
       if (g.x < g.patrolLeft)  { g.x = g.patrolLeft;  g.dir =  1; }
       if (g.x > g.patrolRight) { g.x = g.patrolRight; g.dir = -1; }
     } else if (g.state === 'alert') {
-      // chase ross
+      // chase ross horizontally, but clamp to patrol bounds so guard doesn't walk off platform edge
       const dx = (ross.x + ross.w/2) - (g.x + g.w/2);
-      const d  = Math.abs(dx);
-      if (d > 4) {
+      if (Math.abs(dx) > 4) {
         g.dir = dx > 0 ? 1 : -1;
-        g.x  += g.dir * g.speed * 1.5 * dt;
+        g.x  += g.dir * g.speed * 1.6 * dt;
+        g.x   = Math.max(g.patrolLeft, Math.min(g.patrolRight, g.x));
       }
       g.stateTimer -= dt;
       if (g.stateTimer <= 0) {
@@ -829,10 +834,12 @@ function updateGuards(dt) {
     }
 
     // guards don't use gravity — they stay on their assigned patrol floor
-    // vision detection
+    // vision detection — only trigger if ross is on roughly the same floor (within 80px vertically)
     if (!ross.crouching) {
-      if (inVisionCone(g, ross)) {
+      const sameFloor = Math.abs((ross.y + ross.h/2) - (g.y + g.h/2)) < 80;
+      if (sameFloor && inVisionCone(g, ross)) {
         ghostStatus = false;
+        detectionFlash = 0.7;
         if (g.state !== 'alert') {
           g.state = 'alert';
           g.stateTimer = 5;
@@ -867,6 +874,7 @@ function inVisionCone(guard, target) {
 
 function updateNoelia(dt) {
   if (!noelia) return;
+  if (noelia.startDelay > 0) { noelia.startDelay -= dt; return; }
 
   // Noelia floats smoothly to her target position (scripted NPC, no gravity)
   let tx, ty;
@@ -901,6 +909,7 @@ function updateNoelia(dt) {
     hasLoot = true;
     exitPoint.active = true;
     G.score += 100;
+    spawnPopup(ross.x, ross.y - 10, '+100  STOLEN BACK!', '#e87020');
   }
 }
 
@@ -973,6 +982,10 @@ function updateDevroe() {
   }
 }
 
+function spawnPopup(wx, wy, text, color) {
+  popups.push({ x: wx, y: wy, text, color: color || '#c9a84c', life: 1.4 });
+}
+
 function checkLoot() {
   // main loot
   if (!hasLoot && !lootItem.collected && aabb(ross, lootItem)) {
@@ -980,20 +993,25 @@ function checkLoot() {
     lootItem.collected = true;
     exitPoint.active = true;
     G.score += 200;
+    spawnPopup(ross.x, ross.y - 10, '+200  LOOT SECURED');
   }
   // bonus loot
   for (const b of bonusItems) {
     if (!b.collected && aabb(ross, {x:b.x, y:b.y, w:20, h:20})) {
       b.collected = true;
       G.score += b.pts;
+      spawnPopup(b.x, b.y - 10, '+' + b.pts);
     }
   }
-  // laser check
+  // laser check — sets all guards alert
   if (!ross.crouching) {
     for (const l of lasers) {
       if (aabb(ross, l)) {
         ghostStatus = false;
-        for (const g of guards) { g.state = 'alert'; g.stateTimer = 5; }
+        detectionFlash = 0.8;
+        for (const g of guards) {
+          if (g.state !== 'alert') { g.state = 'alert'; g.stateTimer = 5; }
+        }
       }
     }
   }
@@ -1179,9 +1197,13 @@ function render() {
   drawNoelia(t);
   drawRoss(t);
   drawSmoke(t);
-  drawControlsHint(t);
+  drawPopups(t);
 
-  ctx.restore();
+  ctx.restore(); // end world-space transform
+
+  // screen-space overlays drawn after restore
+  drawDetectionFlash();
+  drawControlsHint(t);
 }
 
 function drawPlatforms() {
@@ -1325,6 +1347,43 @@ function drawNoelia(t) {
   ctx.font = '13px serif';
   ctx.textAlign = 'center';
   ctx.fillText(noelia.hasLoot ? '😏' : '👤', noelia.x + noelia.w/2, noelia.y - 20);
+}
+
+function drawDetectionFlash() {
+  if (detectionFlash <= 0) return;
+  detectionFlash = Math.max(0, detectionFlash - lastDt * 1.8);
+  // draw in screen space
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = `rgba(192,57,43,${detectionFlash * 0.45})`;
+  ctx.fillRect(0, 0, W, H);
+  if (detectionFlash > 0.4) {
+    ctx.font = 'bold 28px Cinzel, serif';
+    ctx.fillStyle = `rgba(255,80,60,${(detectionFlash - 0.4) * 2})`;
+    ctx.textAlign = 'center';
+    ctx.fillText('SPOTTED', W / 2, H / 2 - 20);
+  }
+  ctx.restore();
+}
+
+function drawPopups(t) {
+  if (popups.length === 0) return;
+  ctx.save();
+  // popups are in world space (they scroll with camera)
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i];
+    p.life -= lastDt;
+    p.y    -= 28 * lastDt;  // float upward
+    if (p.life <= 0) { popups.splice(i, 1); continue; }
+    const alpha = Math.min(1, p.life);
+    ctx.globalAlpha = alpha;
+    ctx.font = 'bold 14px Cinzel, serif';
+    ctx.fillStyle = p.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(p.text, p.x + 10, p.y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 function drawSmoke(t) {
