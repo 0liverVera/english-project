@@ -335,59 +335,63 @@ const LEVEL_DEFS = [
     smokeBombs: 2,
     bgColor: '#08080e',
     platforms: [
-      // ground floor
+      // GROUND FLOOR -- main atrium
       {x:0,    y:520, w:2400, h:80,  col:'#0d0d18'},
-      // ── FLOOR 2 SLAB ── split into 3 sections, leaving two staircase gaps
-      // left section  x:20 → 380   |  gap x:380–700  |  mid x:700 → 1600  |  gap x:1600–1920  |  right x:1920 → 2380
-      {x:20,   y:280, w:360,  h:20,  col:'#111128'},
-      {x:700,  y:280, w:900,  h:20,  col:'#111128'},
-      {x:1920, y:280, w:460,  h:20,  col:'#111128'},
-      // ── LEFT STAIRCASE (gap x:380–700, ascends left→right) ──
-      {x:380,  y:456, w:110,  h:18,  col:'#1e1e3a'},
-      {x:395,  y:396, w:110,  h:18,  col:'#1e1e3a'},
-      {x:420,  y:336, w:110,  h:18,  col:'#1e1e3a'},
-      {x:450,  y:264, w:244,  h:18,  col:'#1e1e3a'},  // landing → drops onto middle slab at x:700
-      // ── RIGHT STAIRCASE (gap x:1600–1920, landing on left, ascends right) ──
-      {x:1606, y:264, w:308,  h:18,  col:'#1e1e3a'},  // landing → drops onto middle slab at x:1600
-      {x:1670, y:336, w:110,  h:18,  col:'#1e1e3a'},
+      // LEFT WING BALCONY (west gallery, attached to left wall)
+      {x:20,   y:280, w:580,  h:14,  col:'#111128'},
+      // RIGHT WING BALCONY (east gallery, attached to right wall)
+      {x:1800, y:280, w:580,  h:14,  col:'#111128'},
+      // CENTRE DISPLAY DAIS (raised plinth where the scroll is exhibited)
+      {x:1000, y:240, w:400,  h:14,  col:'#1a1a3a'},
+      // LEFT STAIRCASE -- three steps rising toward left-wing edge (x:600)
+      {x:620,  y:456, w:110,  h:18,  col:'#1e1e3a'},
+      {x:590,  y:396, w:110,  h:18,  col:'#1e1e3a'},
+      {x:555,  y:336, w:110,  h:18,  col:'#1e1e3a'},
+      // LEFT BRIDGE -- links balcony edge to centre dais
+      {x:720,  y:264, w:140,  h:18,  col:'#1e1e3a'},
+      {x:870,  y:252, w:130,  h:18,  col:'#1e1e3a'},
+      // RIGHT STAIRCASE -- mirror of left (toward x:1800)
+      {x:1670, y:456, w:110,  h:18,  col:'#1e1e3a'},
       {x:1700, y:396, w:110,  h:18,  col:'#1e1e3a'},
-      {x:1720, y:456, w:110,  h:18,  col:'#1e1e3a'},
-      // ── FLOOR 1 STEPPING STONES (extra movement on ground floor) ──
-      {x:180,  y:430, w:160,  h:18,  col:'#14142a'},
-      {x:950,  y:440, w:160,  h:18,  col:'#14142a'},
-      {x:1200, y:400, w:180,  h:18,  col:'#14142a'},
-      {x:2050, y:440, w:160,  h:18,  col:'#14142a'},
-      // ── FLOOR 2 UPPER PLATFORMS (bonus loot perches above slab) ──
-      {x:100,  y:190, w:200,  h:18,  col:'#14142a'},
-      {x:900,  y:190, w:200,  h:18,  col:'#14142a'},
-      {x:1500, y:190, w:160,  h:18,  col:'#14142a'},
-      {x:2050, y:190, w:200,  h:18,  col:'#14142a'},
-      // walls
+      {x:1735, y:336, w:110,  h:18,  col:'#1e1e3a'},
+      // RIGHT BRIDGE
+      {x:1540, y:264, w:140,  h:18,  col:'#1e1e3a'},
+      {x:1400, y:252, w:130,  h:18,  col:'#1e1e3a'},
+      // GROUND-LEVEL EXHIBIT PEDESTALS (stepping stones across atrium)
+      {x:680,  y:435, w:160,  h:18,  col:'#14142a'},
+      {x:1050, y:400, w:200,  h:18,  col:'#14142a'},
+      {x:1490, y:435, w:160,  h:18,  col:'#14142a'},
+      // UPPER-TIER BONUS PLATFORMS (above each wing)
+      {x:80,   y:185, w:220,  h:18,  col:'#14142a'},
+      {x:2100, y:185, w:200,  h:18,  col:'#14142a'},
+      // WALLS
       {x:0,    y:0,   w:20,   h:520, col:'#08080e'},
       {x:2380, y:0,   w:20,   h:520, col:'#08080e'},
     ],
     guards: [
-      // floor 1 (y:490 so feet sit on ground at y:520)
-      {x:200,  y:490, patrolLeft:30,   patrolRight:370,  speed:55},
-      {x:1050, y:490, patrolLeft:700,  patrolRight:1590, speed:65},
-      {x:2100, y:490, patrolLeft:1920, patrolRight:2360, speed:60},
-      // floor 2 (y:248 so feet sit on slab top at y:280)
-      {x:200,  y:248, patrolLeft:30,   patrolRight:685,  speed:70},
-      {x:1100, y:248, patrolLeft:710,  patrolRight:1590, speed:75},
+      // ground floor atrium (y:490)
+      {x:700,  y:490, patrolLeft:30,   patrolRight:610,  speed:55},
+      {x:1600, y:490, patrolLeft:1390, patrolRight:2350, speed:55},
+      // left wing balcony (y:248, feet on balcony top y:280)
+      {x:250,  y:248, patrolLeft:30,   patrolRight:590,  speed:68},
+      // right wing balcony
+      {x:2050, y:248, patrolLeft:1810, patrolRight:2350, speed:70},
+      // display dais guard (y:208, feet on dais top y:240)
+      {x:1180, y:208, patrolLeft:1010, patrolRight:1390, speed:75},
     ],
-    loot: {x:2100, y:245, label:'📜'},
+    loot: {x:1150, y:205, label:'📜'},
     bonusLoot:[
-      {x:150,  y:155, label:'💍', pts:50},
-      {x:2055, y:155, label:'💍', pts:50},
+      {x:120,  y:150, label:'💍', pts:50},
+      {x:2130, y:150, label:'💍', pts:50},
     ],
     exit: {x:30, y:460},
     rossStart: {x:60, y:490},
-    noelia: {x:2340, y:248, patrolTarget:2100, speed:85},
+    noelia: {x:2350, y:248, patrolTarget:1150, speed:85},
     devroe: true,
-    devroeFloor: 2, // triggers when ross reaches y < 300
+    devroeFloor: 2,
     searchlights: [
-      {x:200,  y:280, angle:0,        speed:0.6, range:180, width:40},
-      {x:1200, y:280, angle:Math.PI,  speed:0.7, range:180, width:40},
+      {x:300,  y:280, angle:0.4,         speed:0.6, range:200, width:45},
+      {x:2050, y:280, angle:Math.PI-0.4, speed:0.7, range:200, width:45},
     ],
     lasers: [],
   },
@@ -397,85 +401,152 @@ const LEVEL_DEFS = [
     loc: 'Monaco Harbor',
     diff: '⭐⭐⭐',
     guardCount: '6 Guards',
-    count: 'The Monaco Ledger. Penthouse suite. Someone very dangerous owns it. Retrieve it. Don\'t open it. Don\'t get caught. Don\'t die.',
+    count: 'The Monaco Ledger. Penthouse suite. Someone very dangerous owns it. Retrieve it. Do not open it. Do not get caught.',
     objective: 'Collect the Ledger',
     objectiveAfter: 'Reach the Exit',
     smokeBombs: 3,
     bgColor: '#060810',
     platforms: [
-      // ground floor
+      // GROUND FLOOR -- lobby entrance
       {x:0,    y:520, w:2400, h:80,  col:'#0a0c14'},
-      // ── FLOOR 2 SLAB ── split with two staircase gaps (same column positions as level 2)
-      {x:20,   y:340, w:360,  h:20,  col:'#0c0e1c'},   // left:  x:20-380
-      {x:700,  y:340, w:900,  h:20,  col:'#0c0e1c'},   // mid:   x:700-1600
-      {x:1920, y:340, w:460,  h:20,  col:'#0c0e1c'},   // right: x:1920-2380
-      // ── FLOOR 3 SLAB ── same gap columns
-      {x:20,   y:160, w:360,  h:20,  col:'#0c0e1c'},
-      {x:700,  y:160, w:900,  h:20,  col:'#0c0e1c'},
-      {x:1920, y:160, w:460,  h:20,  col:'#0c0e1c'},
-      // ── LEFT STAIRCASE — ground → floor 2 (gap x:380-700) ──
-      {x:385,  y:456, w:110,  h:18,  col:'#14163a'},
-      {x:400,  y:396, w:110,  h:18,  col:'#14163a'},
-      {x:415,  y:334, w:278,  h:18,  col:'#14163a'},   // landing → step down to floor-2 slab at x:700
-      // ── RIGHT STAIRCASE — ground → floor 2 (gap x:1600-1920) ──
-      {x:1800, y:456, w:110,  h:18,  col:'#14163a'},
-      {x:1780, y:396, w:110,  h:18,  col:'#14163a'},
-      {x:1607, y:334, w:307,  h:18,  col:'#14163a'},   // landing → step down to floor-2 slab at x:1600
-      // ── LEFT STAIRCASE — floor 2 → floor 3 (same gap x:380-700) ──
-      {x:385,  y:276, w:110,  h:18,  col:'#14163a'},
-      {x:400,  y:216, w:110,  h:18,  col:'#14163a'},
-      {x:415,  y:154, w:278,  h:18,  col:'#14163a'},   // landing → step down to floor-3 slab at x:700
-      // ── RIGHT STAIRCASE — floor 2 → floor 3 (gap x:1600-1920) ──
-      {x:1800, y:276, w:110,  h:18,  col:'#14163a'},
-      {x:1780, y:216, w:110,  h:18,  col:'#14163a'},
-      {x:1607, y:154, w:307,  h:18,  col:'#14163a'},   // landing → step down to floor-3 slab at x:1600
-      // ── FLOOR 1 STEPPING STONES ──
-      {x:200,  y:440, w:160,  h:18,  col:'#10122a'},
-      {x:900,  y:440, w:160,  h:18,  col:'#10122a'},
-      {x:1200, y:400, w:180,  h:18,  col:'#10122a'},
-      {x:1700, y:440, w:160,  h:18,  col:'#10122a'},
-      // ── FLOOR 2 UPPER PLATFORMS ──
-      {x:100,  y:258, w:200,  h:18,  col:'#10122a'},
-      {x:900,  y:258, w:200,  h:18,  col:'#10122a'},
-      {x:1500, y:258, w:160,  h:18,  col:'#10122a'},
-      {x:2050, y:258, w:200,  h:18,  col:'#10122a'},
-      // ── FLOOR 3 UPPER PLATFORMS ──
-      {x:100,  y:100, w:200,  h:18,  col:'#10122a'},
-      {x:850,  y:100, w:200,  h:18,  col:'#10122a'},
-      {x:1400, y:100, w:180,  h:18,  col:'#10122a'},
-      {x:1950, y:100, w:300,  h:18,  col:'#10122a'},
-      // walls
+      // FLOOR 2 LEFT TERRACE (balcony off left wall)
+      {x:20,   y:340, w:700,  h:14,  col:'#0c0e1c'},
+      // FLOOR 2 RIGHT TERRACE
+      {x:1680, y:340, w:700,  h:14,  col:'#0c0e1c'},
+      // FLOOR 3 LEFT PENTHOUSE SUITE
+      {x:20,   y:160, w:700,  h:14,  col:'#0c0e1c'},
+      // FLOOR 3 RIGHT PENTHOUSE SUITE
+      {x:1680, y:160, w:700,  h:14,  col:'#0c0e1c'},
+      // FLOOR 3 CENTRE VAULT (where the ledger is kept)
+      {x:900,  y:160, w:600,  h:14,  col:'#0c0e1c'},
+      // GROUND->FLOOR2 LEFT STAIRCASE (gap x:720-900)
+      {x:720,  y:456, w:110,  h:18,  col:'#14163a'},
+      {x:700,  y:396, w:110,  h:18,  col:'#14163a'},
+      {x:685,  y:334, w:200,  h:18,  col:'#14163a'},
+      // GROUND->FLOOR2 RIGHT STAIRCASE (gap x:1480-1680)
+      {x:1570, y:456, w:110,  h:18,  col:'#14163a'},
+      {x:1590, y:396, w:110,  h:18,  col:'#14163a'},
+      {x:1595, y:334, w:200,  h:18,  col:'#14163a'},
+      // FLOOR2->FLOOR3 LEFT STAIRCASE (same gap x:720-900)
+      {x:720,  y:276, w:110,  h:18,  col:'#14163a'},
+      {x:700,  y:216, w:110,  h:18,  col:'#14163a'},
+      {x:685,  y:154, w:215,  h:18,  col:'#14163a'},
+      // FLOOR2->FLOOR3 RIGHT STAIRCASE (gap x:1480-1680)
+      {x:1570, y:276, w:110,  h:18,  col:'#14163a'},
+      {x:1590, y:216, w:110,  h:18,  col:'#14163a'},
+      {x:1500, y:154, w:215,  h:18,  col:'#14163a'},
+      // LOBBY STEPPING STONES
+      {x:780,  y:440, w:180,  h:18,  col:'#10122a'},
+      {x:1100, y:410, w:200,  h:18,  col:'#10122a'},
+      {x:1440, y:440, w:180,  h:18,  col:'#10122a'},
+      // FLOOR 2 UPPER PLATFORMS
+      {x:100,  y:260, w:180,  h:18,  col:'#10122a'},
+      {x:1900, y:260, w:180,  h:18,  col:'#10122a'},
+      // WALLS
       {x:0,    y:0,   w:20,   h:520, col:'#060810'},
       {x:2380, y:0,   w:20,   h:520, col:'#060810'},
     ],
     guards: [
-      // floor 1 (y:490, feet at ground y:520)
-      {x:400,  y:490, patrolLeft:100,  patrolRight:680,  speed:60},
-      {x:1600, y:490, patrolLeft:710,  patrolRight:1590, speed:65},
-      {x:2100, y:490, patrolLeft:1920, patrolRight:2350, speed:60},
-      // floor 2 (y:308, feet at slab top y:340)
-      {x:300,  y:308, patrolLeft:30,   patrolRight:680,  speed:70},
-      {x:1200, y:308, patrolLeft:710,  patrolRight:1590, speed:75},
-      // floor 3 (y:128, feet at slab top y:160)
-      {x:1200, y:128, patrolLeft:710,  patrolRight:1910, speed:80},
+      // floor 1 (y:490)
+      {x:400,  y:490, patrolLeft:100,  patrolRight:710,  speed:60},
+      {x:1600, y:490, patrolLeft:1490, patrolRight:2350, speed:60},
+      // floor 2 (y:308, feet at terrace top y:340)
+      {x:300,  y:308, patrolLeft:30,   patrolRight:710,  speed:70},
+      {x:2000, y:308, patrolLeft:1690, patrolRight:2350, speed:72},
+      // floor 3 (y:128, feet at vault/suite top y:160)
+      {x:300,  y:128, patrolLeft:30,   patrolRight:710,  speed:76},
+      {x:1600, y:128, patrolLeft:910,  patrolRight:2350, speed:80},
     ],
-    loot: {x:2050, y:125, label:'📒'},
+    loot: {x:1150, y:125, label:'📒'},
     bonusLoot:[
-      {x:120,  y:65,  label:'💍', pts:50},
-      {x:1430, y:65,  label:'💍', pts:50},
+      {x:100,  y:125, label:'💍', pts:50},
+      {x:2100, y:125, label:'💍', pts:50},
     ],
-    exit: {x:2320, y:460},
+    exit: {x:2340, y:460},
     rossStart: {x:80, y:490},
-    noelia: {x:2300, y:128, patrolTarget:2050, speed:90, startDelay:4},
+    noelia: {x:2350, y:128, patrolTarget:1150, speed:90, startDelay:4},
     devroe: true,
     devroeFloor: 2,
     searchlights: [
-      {x:300,  y:160, angle:0,        speed:0.8, range:170, width:35},
+      {x:350,  y:160, angle:0,        speed:0.8, range:170, width:35},
       {x:1200, y:160, angle:Math.PI,  speed:0.9, range:170, width:35},
     ],
     lasers: [
-      {x:850,  y:118, w:160, h:6, moving:false},
+      {x:870,  y:118, w:160, h:6, moving:false},
       {x:1350, y:118, w:140, h:6, moving:false},
+    ],
+  },
+  {
+    name: 'The Royal Vault',
+    phase: 'Final Heist',
+    loc: 'London, England',
+    diff: '⭐⭐⭐⭐',
+    guardCount: 'Nemesis + 5 Guards',
+    count: 'The Kensington Crown. It is a trap. Devroe knows you are coming. The vault is fortified and guards have your face memorized. Steal the Crown and escape before the Nemesis finds you.',
+    objective: 'Steal the Crown',
+    objectiveAfter: 'Escape the Vault',
+    smokeBombs: 3,
+    bgColor: '#050508',
+    platforms: [
+      // GROUND FLOOR -- service corridors beneath the vault
+      {x:0,    y:520, w:2400, h:80,  col:'#0a0808'},
+      // VAULT FLOOR LEFT WING
+      {x:20,   y:300, w:680,  h:14,  col:'#120810'},
+      // VAULT FLOOR CENTRE (the crown is here)
+      {x:900,  y:300, w:600,  h:14,  col:'#120810'},
+      // VAULT FLOOR RIGHT WING (nemesis patrols here)
+      {x:1700, y:300, w:680,  h:14,  col:'#120810'},
+      // LEFT STAIRCASE (gap x:700-900)
+      {x:700,  y:456, w:110,  h:18,  col:'#1e0a0a'},
+      {x:700,  y:396, w:110,  h:18,  col:'#1e0a0a'},
+      {x:690,  y:334, w:210,  h:18,  col:'#1e0a0a'},
+      // RIGHT STAIRCASE (gap x:1500-1700)
+      {x:1590, y:456, w:110,  h:18,  col:'#1e0a0a'},
+      {x:1590, y:396, w:110,  h:18,  col:'#1e0a0a'},
+      {x:1500, y:334, w:210,  h:18,  col:'#1e0a0a'},
+      // GROUND STEPPING STONES
+      {x:200,  y:440, w:180,  h:18,  col:'#14080a'},
+      {x:900,  y:430, w:200,  h:18,  col:'#14080a'},
+      {x:1500, y:440, w:180,  h:18,  col:'#14080a'},
+      {x:2000, y:440, w:180,  h:18,  col:'#14080a'},
+      // WALLS
+      {x:0,    y:0,   w:20,   h:520, col:'#050508'},
+      {x:2380, y:0,   w:20,   h:520, col:'#050508'},
+    ],
+    guards: [
+      // ground (y:490) -- fast!
+      {x:400,  y:490, patrolLeft:30,   patrolRight:690,  speed:72},
+      {x:1200, y:490, patrolLeft:700,  patrolRight:1490, speed:75},
+      {x:2000, y:490, patrolLeft:1710, patrolRight:2350, speed:72},
+      // vault floor (y:268, feet at vault top y:300)
+      {x:200,  y:268, patrolLeft:30,   patrolRight:690,  speed:80},
+      {x:1200, y:268, patrolLeft:910,  patrolRight:1490, speed:85},
+      // NEMESIS -- extremely fast, patrols full right wing
+      {x:2100, y:268, patrolLeft:1710, patrolRight:2350, speed:105},
+    ],
+    loot: {x:1150, y:265, label:'👑'},
+    bonusLoot:[
+      {x:200,  y:265, label:'💍', pts:75},
+      {x:2000, y:265, label:'💍', pts:75},
+    ],
+    exit: {x:30, y:460},
+    rossStart: {x:60, y:490},
+    noelia: null,
+    devroe: false,
+    searchlights: [
+      {x:350,  y:300, angle:0,        speed:1.0, range:210, width:50},
+      {x:1200, y:300, angle:Math.PI,  speed:1.1, range:210, width:50},
+      {x:2000, y:300, angle:0,        speed:0.9, range:210, width:50},
+    ],
+    lasers: [
+      {x:430,  y:478, w:170, h:6, moving:false},
+      {x:900,  y:460, w:150, h:6, moving:false},
+      {x:1380, y:478, w:160, h:6, moving:false},
+      {x:1900, y:460, w:170, h:6, moving:false},
+      {x:340,  y:258, w:200, h:6, moving:false},
+      {x:950,  y:258, w:160, h:6, moving:false},
+      {x:1190, y:258, w:160, h:6, moving:false},
+      {x:1800, y:258, w:200, h:6, moving:false},
     ],
   }
 ];
@@ -1651,6 +1722,7 @@ function drawBackground(t) {
     ['#110d06','#1c1408'],   // Nairobi — warm dark amber
     ['#06060f','#0a0818'],   // Tokyo   — deep violet-blue
     ['#040610','#07091a'],   // Monaco  — midnight navy
+    ['#050308','#090508'],   // London  — near-black crimson night
   ];
   const [top, bot] = skyColors[idx] || skyColors[0];
   const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -1664,6 +1736,7 @@ function drawBackground(t) {
     'rgba(255,210,150,', // Nairobi — warm
     'rgba(160,160,255,', // Tokyo   — cool blue
     'rgba(180,200,255,', // Monaco  — icy
+    'rgba(255,160,160,', // London  — red-tinged, foggy
   ];
   const tint = starTints[idx] || starTints[0];
   for (const s of BG_STARS) {
@@ -1676,9 +1749,10 @@ function drawBackground(t) {
   }
 
   // level-specific atmosphere
-  if (idx === 0) drawBgNairobi(t, parallax);
+  if (idx === 0)      drawBgNairobi(t, parallax);
   else if (idx === 1) drawBgTokyo(t, parallax);
-  else               drawBgMonaco(t, parallax);
+  else if (idx === 2) drawBgMonaco(t, parallax);
+  else                drawBgLondon(t, parallax);
 }
 
 function drawBgNairobi(t, px) {
@@ -1788,6 +1862,74 @@ function drawBgMonaco(t, px) {
   ctx.arc(moonX, moonY, 8, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(220,230,255,0.7)';
   ctx.fill();
+}
+
+function drawBgLondon(t, px) {
+  const baseY = H * 0.58;
+  // Parliament / Big Ben silhouettes
+  const buildings = [
+    {f:0.03, w:36,  h:300, spire:true},   // Big Ben tower
+    {f:0.1,  w:200, h:160},               // Parliament left
+    {f:0.28, w:80,  h:200},
+    {f:0.42, w:130, h:175},
+    {f:0.56, w:90,  h:220},
+    {f:0.7,  w:150, h:165},
+    {f:0.84, w:70,  h:195},
+    {f:0.93, w:110, h:180},
+  ];
+  for (const b of buildings) {
+    const bx = ((b.f * W * 2.2 - px * 0.4) % (W + 240) + W + 240) % (W + 240) - 120;
+    ctx.fillStyle = '#07040e';
+    ctx.fillRect(bx - b.w / 2, baseY - b.h, b.w, b.h);
+    if (b.spire) {
+      ctx.beginPath();
+      ctx.moveTo(bx, baseY - b.h - 50);
+      ctx.lineTo(bx - 14, baseY - b.h);
+      ctx.lineTo(bx + 14, baseY - b.h);
+      ctx.closePath();
+      ctx.fill();
+      // clock face glow
+      ctx.fillStyle = 'rgba(255,220,120,0.18)';
+      ctx.beginPath();
+      ctx.arc(bx, baseY - b.h * 0.82, 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // dim amber windows
+    for (let wy = baseY - b.h + 12; wy < baseY - 12; wy += 16) {
+      for (let wx = bx - b.w / 2 + 6; wx < bx + b.w / 2 - 6; wx += 12) {
+        if (Math.sin(wx * 0.35 + wy * 0.55 + t * 0.08) > 0.3) {
+          ctx.fillStyle = 'rgba(255,190,80,0.28)';
+          ctx.fillRect(wx, wy, 4, 6);
+        }
+      }
+    }
+  }
+  // Thames / ground dark strip
+  ctx.fillStyle = '#050308';
+  ctx.fillRect(0, baseY, W, H - baseY);
+  // Thames shimmer (dark red-brown water)
+  for (let i = 0; i < 18; i++) {
+    const wx = ((i * 149 - px * 0.18 + t * 12) % W + W) % W;
+    const wy = baseY + 8 + (i % 4) * 10;
+    ctx.fillStyle = `rgba(120,40,40,${0.06 + 0.03 * Math.sin(t * 1.2 + i)})`;
+    ctx.fillRect(wx, wy, 25 + (i % 3) * 14, 2);
+  }
+  // rolling fog bands
+  for (let i = 0; i < 4; i++) {
+    const fy = baseY - 18 + i * 14;
+    const fx = ((i * 280 - px * 0.12 + t * 6) % (W + 300) + W + 300) % (W + 300) - 150;
+    const fogGrad = ctx.createLinearGradient(fx - 80, fy, fx + 280, fy);
+    fogGrad.addColorStop(0, 'rgba(100,90,110,0)');
+    fogGrad.addColorStop(0.3, `rgba(100,90,110,${0.05 + 0.03 * Math.sin(t * 0.6 + i)})`);
+    fogGrad.addColorStop(1, 'rgba(100,90,110,0)');
+    ctx.fillStyle = fogGrad;
+    ctx.fillRect(fx - 80, fy, 360, 10);
+  }
+  // red phone box silhouette (tiny detail)
+  const pbx = ((0.65 * W - px * 0.3) % W + W) % W;
+  ctx.fillStyle = '#4a0808';
+  ctx.fillRect(pbx - 5, baseY - 28, 10, 28);
+  ctx.fillRect(pbx - 6, baseY - 32, 12, 5);
 }
 
 // ═══════════════════════════════════════════════
