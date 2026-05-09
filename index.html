@@ -8,816 +8,1466 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0a0f;--bg2:#111118;--gold:#c9a84c;--gold-dim:#8a6f2e;
-  --crimson:#8b1a1a;--crimson-b:#c0392b;--text:#e8e6df;--text-dim:#9a9585;
-  --card:#13131c;--border:#2a2a3a;--dossier:#f0ead6;--dos-text:#1a1408;
+  --bg:#0a0a0f;--gold:#c9a84c;--gold-dim:#8a6f2e;
+  --crimson:#8b1a1a;--crimson-b:#c0392b;
+  --text:#e8e6df;--text-dim:#9a9585;
+  --card:#13131c;--border:#2a2a3a;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
-#app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px}
-.screen{display:none;width:100%;max-width:860px;animation:fadeIn .5s ease}
-.screen.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideRight{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden}
+canvas{display:block;position:fixed;top:0;left:0;z-index:1}
 
-/* TYPE */
-h1{font-family:'Cinzel',serif;font-size:clamp(2.6rem,8vw,5rem);font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 40px rgba(201,168,76,.4);line-height:1.1}
-h2{font-family:'Cinzel',serif;font-size:clamp(1.2rem,4vw,1.9rem);font-weight:700;color:var(--gold);letter-spacing:.06em}
-h3{font-family:'Cinzel',serif;font-size:clamp(.95rem,3vw,1.3rem);color:var(--gold)}
+/* ── UI OVERLAY ── */
+#ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+.screen{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;padding:24px;pointer-events:all}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{animation:fadeIn .4s ease}
+
+/* typography */
+h1{font-family:'Cinzel',serif;font-size:clamp(2.4rem,7vw,4.8rem);font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 40px rgba(201,168,76,.45);line-height:1.1;text-align:center}
+h2{font-family:'Cinzel',serif;font-size:clamp(1.1rem,3.5vw,1.8rem);font-weight:700;color:var(--gold);letter-spacing:.06em;text-align:center}
+h3{font-family:'Cinzel',serif;font-size:clamp(.9rem,2.5vw,1.2rem);color:var(--gold);text-align:center}
 p{line-height:1.7;color:var(--text)}
 
-/* BUTTONS */
+/* buttons */
 .btn{font-family:'Cinzel',serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:13px 34px;border:2px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .22s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
 .btn:hover{background:var(--gold);color:var(--bg);box-shadow:0 0 20px rgba(201,168,76,.4)}
-.btn:disabled{opacity:.35;cursor:not-allowed;background:transparent;color:var(--gold-dim);border-color:var(--gold-dim)}
 .btn-red{border-color:var(--crimson-b);color:var(--crimson-b)}
-.btn-red:hover{background:var(--crimson-b);color:#fff;box-shadow:0 0 20px rgba(192,57,43,.4)}
+.btn-red:hover{background:var(--crimson-b);color:#fff}
 
-.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:22px 0;opacity:.4}
+.divider{width:100%;max-width:500px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:20px 0;opacity:.4}
+.ornament{font-size:1.2rem;color:var(--gold-dim);letter-spacing:.5em;margin:14px 0}
+.intro-block{max-width:520px;color:var(--text-dim);font-size:.92rem;line-height:1.85;border-left:2px solid var(--gold);padding-left:18px;text-align:left;margin-bottom:32px}
+.eyebrow{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:12px}
 
-/* SCORE HUD */
-#hud{position:fixed;top:16px;right:20px;background:rgba(10,10,15,.92);border:1px solid var(--gold-dim);padding:7px 15px;font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);z-index:100;display:none;letter-spacing:.08em}
+/* ── TITLE ── */
+#s-title{background:var(--bg)}
+.subtitle{font-family:'Cinzel',serif;font-size:clamp(.8rem,2.2vw,1rem);color:var(--text-dim);letter-spacing:.08em;margin:12px 0 26px;font-style:italic}
 
-/* ── SCREEN 1: TITLE ── */
-#s-title{text-align:center}
-.eyebrow{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:14px}
-.subtitle{font-family:'Cinzel',serif;font-size:clamp(.85rem,2.5vw,1.05rem);color:var(--text-dim);letter-spacing:.08em;margin:14px 0 28px;font-style:italic}
-.ornament{font-size:1.3rem;color:var(--gold-dim);letter-spacing:.5em;margin:18px 0}
-.intro-block{max-width:560px;margin:0 auto 38px;color:var(--text-dim);font-size:.93rem;line-height:1.85;border-left:2px solid var(--gold);padding-left:20px;text-align:left}
-
-/* ── SCREEN 2: DOSSIERS ── */
-.rival-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:28px 0}
-.rival-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:22px 18px;transition:transform .2s,box-shadow .2s}
-.rival-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+/* ── DOSSIERS ── */
+#s-dossiers{background:var(--bg);overflow-y:auto}
+.rival-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0;width:100%;max-width:800px}
+.rival-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:20px 16px}
 .rival-card.red{border-top-color:var(--crimson-b)}
-.r-avatar{font-size:2.3rem;margin-bottom:10px}
-.r-name{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold);margin-bottom:3px}
-.r-tag{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson-b);margin-bottom:10px}
-.r-bio{font-size:.82rem;color:var(--text-dim);line-height:1.65;font-style:italic}
+.r-avatar{font-size:2rem;margin-bottom:8px}
+.r-name{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold);margin-bottom:3px}
+.r-tag{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--crimson-b);margin-bottom:8px}
+.r-bio{font-size:.8rem;color:var(--text-dim);line-height:1.6;font-style:italic;margin-bottom:8px}
+.r-hint{font-size:.75rem;color:var(--gold-dim);border-top:1px solid var(--border);padding-top:8px;margin-top:4px}
 
-/* ── SCREEN 3: BRIEFING ── */
-.count-box{background:var(--card);border:1px solid var(--gold-dim);border-left:4px solid var(--gold);padding:26px 30px;margin:24px 0;position:relative}
-.count-box::before{content:'"';font-family:'Cinzel',serif;font-size:5rem;color:var(--gold-dim);position:absolute;top:-10px;left:14px;line-height:1;opacity:.35}
-.count-label{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.25em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:14px}
-.count-text{font-size:.97rem;line-height:1.82;color:var(--text);font-style:italic}
-.heist-meta{display:flex;gap:28px;flex-wrap:wrap;margin:18px 0}
-.meta-item{display:flex;flex-direction:column;gap:3px}
-.meta-lbl{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim)}
-.meta-val{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold)}
+/* ── COUNT INTRO ── */
+#s-intro{background:rgba(10,10,15,.97)}
+.count-box{background:var(--card);border:1px solid var(--gold-dim);border-left:4px solid var(--gold);padding:24px 28px;max-width:600px;width:100%;position:relative;margin:20px 0}
+.count-box::before{content:'"';font-family:'Cinzel',serif;font-size:4.5rem;color:var(--gold-dim);position:absolute;top:-8px;left:12px;line-height:1;opacity:.3}
+.count-lbl{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.25em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:12px}
+.count-txt{font-size:.95rem;line-height:1.82;color:var(--text);font-style:italic}
+.intro-meta{display:flex;gap:24px;flex-wrap:wrap;margin:12px 0}
+.meta-i{display:flex;flex-direction:column;gap:2px}
+.meta-l{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim)}
+.meta-v{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold)}
 
-/* ── SCREEN 4: TOOLS ── */
-.tool-note{color:var(--text-dim);font-size:.88rem;margin:6px 0 22px}
-.sel-display{display:flex;gap:10px;align-items:center;margin-bottom:18px;min-height:34px;flex-wrap:wrap}
-.sel-tag{background:rgba(201,168,76,.12);border:1px solid var(--gold);padding:3px 11px;font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold)}
-.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-bottom:26px}
-.tool-card{background:var(--card);border:2px solid var(--border);padding:18px 12px;cursor:pointer;transition:all .18s;text-align:center;position:relative;user-select:none}
-.tool-card:hover{border-color:var(--gold-dim);transform:translateY(-3px)}
-.tool-card.selected{border-color:var(--gold);background:rgba(201,168,76,.07);box-shadow:0 0 16px rgba(201,168,76,.22)}
-.tool-card.selected::after{content:'✓';position:absolute;top:5px;right:8px;color:var(--gold);font-size:.8rem}
-.t-emoji{font-size:1.9rem;margin-bottom:9px}
-.t-name{font-family:'Cinzel',serif;font-size:.74rem;color:var(--gold);margin-bottom:5px}
-.t-desc{font-size:.7rem;color:var(--text-dim);line-height:1.5}
+/* ── DEATH / GAMEOVER / COMPLETE ── */
+#s-death{background:rgba(10,10,15,.88)}
+#s-gameover{background:rgba(10,10,15,.95)}
+#s-complete{background:rgba(10,10,15,.95);overflow-y:auto}
+.big-red{font-family:'Cinzel',serif;font-size:clamp(2rem,8vw,4rem);font-weight:900;color:var(--crimson-b);text-shadow:0 0 30px rgba(192,57,43,.5);letter-spacing:.1em}
+.stat-row{display:flex;justify-content:space-between;width:100%;max-width:400px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+.stat-label{color:var(--text-dim)}
+.stat-val{font-family:'Cinzel',serif;color:var(--gold)}
 
-/* ── SCREEN 5: HEIST ── */
-.sit-num{font-family:'Cinzel',serif;font-size:.67rem;letter-spacing:.28em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:7px}
-.dossier-card{background:var(--dossier);color:var(--dos-text);padding:26px 30px;border-left:6px solid var(--border);margin:18px 0}
-.dossier-card p{color:var(--dos-text);font-size:.93rem;line-height:1.82}
-.choices{display:flex;flex-direction:column;gap:9px;margin:18px 0}
-.choice{background:var(--card);border:1px solid var(--border);padding:14px 18px;cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:flex-start;gap:11px;width:100%}
-.choice:hover:not(:disabled){border-color:var(--gold-dim);background:rgba(201,168,76,.05)}
-.choice:disabled{cursor:default;opacity:.7}
-.ch-letter{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);min-width:18px;margin-top:1px;flex-shrink:0}
-.ch-body{flex:1}
-.ch-text{font-size:.88rem;color:var(--text);line-height:1.5}
-.ch-hint{font-size:.72rem;margin-top:3px;color:var(--gold-dim)}
-.outcome{background:var(--card);border-left:4px solid var(--gold);padding:14px 18px;margin:10px 0;font-size:.88rem;color:var(--text);font-style:italic;animation:fadeIn .4s ease}
-.outcome.bad{border-left-color:var(--crimson-b)}
-.tools-hud{font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold-dim)}
-.tools-hud span{color:var(--gold)}
-
-/* ── SCREEN 6: RESULT ── */
-.badge{font-family:'Cinzel',serif;font-size:clamp(1.4rem,5vw,2.3rem);font-weight:900;letter-spacing:.1em;padding:14px 30px;display:inline-block;margin:18px 0}
-.badge.ghost{color:var(--gold);border:2px solid var(--gold);box-shadow:0 0 28px rgba(201,168,76,.3)}
-.badge.close{color:#e8a020;border:2px solid #e8a020;box-shadow:0 0 20px rgba(232,160,32,.25)}
-.badge.burned{color:var(--crimson-b);border:2px solid var(--crimson-b);box-shadow:0 0 20px rgba(192,57,43,.28)}
-.result-summary{font-size:.97rem;line-height:1.82;color:var(--text-dim);margin:10px 0 22px;font-style:italic}
-.pts{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);margin:10px 0}
-.event-card{background:var(--card);border:1px solid var(--crimson-b);border-left:4px solid var(--crimson-b);padding:18px 22px;margin:22px 0;animation:slideRight .5s ease}
-.event-card.pos{border-color:var(--gold);border-left-color:var(--gold)}
-.event-lbl{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--crimson-b);margin-bottom:7px}
-.event-card.pos .event-lbl{color:var(--gold-dim)}
-.event-txt{font-size:.88rem;color:var(--text);line-height:1.65}
-.alliance-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-.trivia-opts{display:flex;flex-direction:column;gap:7px;margin-top:12px}
-.t-opt{background:transparent;border:1px solid var(--border);padding:9px 14px;cursor:pointer;color:var(--text);font-size:.84rem;text-align:left;transition:all .18s;font-family:'Inter',sans-serif}
-.t-opt:hover:not(:disabled){border-color:var(--gold-dim);background:rgba(201,168,76,.05)}
-.t-opt.correct{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
-.t-opt.wrong{border-color:var(--crimson-b);color:var(--crimson-b)}
-
-/* ── SCREEN 7: RANKINGS ── */
-.lb{background:var(--card);border:1px solid var(--border);overflow:hidden;margin:22px 0}
-.lb-head{background:rgba(201,168,76,.09);border-bottom:1px solid var(--gold-dim);padding:12px 22px;display:grid;grid-template-columns:44px 1fr 90px;gap:10px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dim)}
-.lb-row{padding:14px 22px;display:grid;grid-template-columns:44px 1fr 90px;gap:10px;align-items:center;border-bottom:1px solid var(--border)}
+/* ── RANKINGS ── */
+#s-rankings{background:var(--bg);overflow-y:auto}
+.lb{background:var(--card);border:1px solid var(--border);overflow:hidden;margin:20px 0;width:100%;max-width:600px}
+.lb-head{background:rgba(201,168,76,.09);border-bottom:1px solid var(--gold-dim);padding:11px 20px;display:grid;grid-template-columns:40px 1fr 90px;gap:10px;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dim)}
+.lb-row{padding:13px 20px;display:grid;grid-template-columns:40px 1fr 90px;gap:10px;align-items:center;border-bottom:1px solid var(--border)}
 .lb-row:last-child{border-bottom:none}
 .lb-row.me{background:rgba(201,168,76,.06)}
-.lb-rank{font-family:'Cinzel',serif;font-size:1.05rem;color:var(--gold-dim);text-align:center}
-.lb-rank.gold{color:var(--gold);font-size:1.35rem}
-.lb-name{font-family:'Cinzel',serif;font-size:.9rem;color:var(--text)}
+.lb-rank{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold-dim);text-align:center}
+.lb-rank.g{color:var(--gold);font-size:1.3rem}
+.lb-name{font-family:'Cinzel',serif;font-size:.88rem;color:var(--text)}
 .lb-name.me{color:var(--gold)}
 .lb-score{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);text-align:right}
-.win-wrap{text-align:center;padding:18px 0}
-.win-title{font-family:'Cinzel',serif;font-size:clamp(1.8rem,6vw,3.2rem);font-weight:900;color:var(--gold);text-shadow:0 0 40px rgba(201,168,76,.5);margin-bottom:10px}
-.lose-title{font-family:'Cinzel',serif;font-size:clamp(1.4rem,5vw,2.4rem);font-weight:700;color:var(--crimson-b)}
-.epilogue{max-width:560px;margin:0 auto 30px;color:var(--text-dim);font-size:.93rem;line-height:1.85;border-left:2px solid var(--gold);padding-left:20px;text-align:left;font-style:italic}
-.epilogue.lose{border-left-color:var(--crimson-b)}
+.win-title{font-family:'Cinzel',serif;font-size:clamp(1.6rem,5vw,3rem);font-weight:900;color:var(--gold);text-shadow:0 0 40px rgba(201,168,76,.5);margin-bottom:10px;text-align:center}
+.lose-title{font-family:'Cinzel',serif;font-size:clamp(1.3rem,4vw,2.4rem);font-weight:700;color:var(--crimson-b);text-align:center}
+.epilogue{max-width:520px;color:var(--text-dim);font-size:.9rem;line-height:1.85;border-left:2px solid var(--gold);padding-left:18px;text-align:left;font-style:italic;margin:16px 0 28px}
 
-@media(max-width:580px){
-  .tool-grid{grid-template-columns:repeat(2,1fr)}
+/* ── HUD (canvas overlay) ── */
+#hud{position:fixed;top:0;left:0;width:100%;z-index:5;pointer-events:none;display:none}
+#hud-inner{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 20px;background:linear-gradient(to bottom,rgba(10,10,15,.85),transparent)}
+.hud-left{display:flex;flex-direction:column;gap:3px}
+.hud-score{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--gold);letter-spacing:.08em}
+.hud-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim)}
+.hud-center{text-align:center}
+.hud-level{font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold-dim);letter-spacing:.1em}
+.hud-obj{font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold)}
+.hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.hud-lives{font-size:1.1rem;letter-spacing:.1em}
+.hud-smoke{font-size:.9rem;letter-spacing:.06em}
+.hud-ghost{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;font-family:'Cinzel',serif}
+.ghost-ok{color:#4caf50}
+.ghost-lost{color:var(--text-dim)}
+
+/* ── DEVROE CARD ── */
+#devroe-card{position:fixed;bottom:0;left:0;width:100%;z-index:20;transform:translateY(100%);transition:transform .4s ease;pointer-events:none}
+#devroe-card.show{transform:translateY(0);pointer-events:all}
+#devroe-inner{background:rgba(13,13,28,.97);border-top:2px solid var(--gold);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.devroe-txt{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold)}
+.devroe-sub{font-size:.82rem;color:var(--text-dim);margin-top:4px}
+.devroe-btns{display:flex;gap:12px}
+
+@media(max-width:560px){
   .rival-grid{grid-template-columns:1fr}
-  .heist-meta{gap:14px}
-  .alliance-row{flex-direction:column}
-  .lb-head,.lb-row{grid-template-columns:34px 1fr 70px;padding:12px 14px}
+  #devroe-inner{flex-direction:column;text-align:center}
 }
 </style>
 </head>
 <body>
-<div id="app">
 
-<!-- S1: TITLE -->
-<div id="s-title" class="screen active">
-  <div class="eyebrow">The Organization Presents</div>
-  <h1>THIEVES'<br>GAMBIT</h1>
-  <div class="ornament">— ✦ —</div>
-  <div class="subtitle">"Only one can win. Only one can wish."</div>
-  <div class="intro-block">
-    Ross Quest is seventeen years old and the best thief you've never heard of — until now. When her mother was taken mid-heist, the ransom was set at one billion dollars. Impossible money. Unless you win the Gambit. The Thieves' Gambit is a secret underground competition where the world's best teen thieves compete for a single wish granted by The Organization — powerful enough to make anything happen. Ross doesn't care about the glory. She just wants her mother back.
-  </div>
-  <button class="btn" onclick="go('s-dossiers')">Enter the Gambit</button>
-</div>
+<canvas id="c"></canvas>
 
-<!-- S2: DOSSIERS -->
-<div id="s-dossiers" class="screen">
-  <div class="eyebrow">Competitor Intelligence</div>
-  <h2>Know Your Rivals</h2>
-  <p style="color:var(--text-dim);margin-top:7px;font-size:.88rem">Three thieves stand between you and the wish. Study them carefully.</p>
-  <div class="rival-grid">
-    <div class="rival-card red">
-      <div class="r-avatar">🗡️</div>
-      <div class="r-name">Noelia Boschert</div>
-      <div class="r-tag">Threat Level: Critical</div>
-      <div class="r-bio">"Your childhood nemesis. She knows your habits, your tells, your weaknesses. She will sabotage you at any cost — and smile doing it."</div>
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-inner">
+    <div class="hud-left">
+      <div class="hud-label">Score</div>
+      <div class="hud-score" id="h-score">0</div>
     </div>
-    <div class="rival-card">
-      <div class="r-avatar">🎩</div>
-      <div class="r-name">Devroe Kenzie</div>
-      <div class="r-tag">Threat Level: Unpredictable</div>
-      <div class="r-bio">"Charming British thief. His motives are unknown, his methods immaculate. Dangerously attractive. Possibly an ally. Probably not."</div>
+    <div class="hud-center">
+      <div class="hud-level" id="h-level">Level 1</div>
+      <div class="hud-obj" id="h-obj">Collect the Diamond</div>
     </div>
-    <div class="rival-card">
-      <div class="r-avatar">👁️</div>
-      <div class="r-name">Taiyō</div>
-      <div class="r-tag">Threat Level: Unknown</div>
-      <div class="r-bio">"Quiet. Methodical. He says nothing, reveals nothing. The wildcard you didn't see coming — and by the time you do, it's already too late."</div>
+    <div class="hud-right">
+      <div class="hud-lives" id="h-lives">🕵️🕵️🕵️</div>
+      <div class="hud-smoke" id="h-smoke">💨💨</div>
+      <div class="hud-ghost ghost-ok" id="h-ghost">◆ GHOST</div>
     </div>
   </div>
-  <div class="divider"></div>
-  <button class="btn" onclick="startGame()">Begin Phase 1</button>
 </div>
 
-<!-- S3: BRIEFING -->
-<div id="s-briefing" class="screen">
-  <div class="eyebrow" id="b-phase"></div>
-  <h2 id="b-name"></h2>
-  <div class="heist-meta">
-    <div class="meta-item"><div class="meta-lbl">Location</div><div class="meta-val" id="b-loc"></div></div>
-    <div class="meta-item"><div class="meta-lbl">Objective</div><div class="meta-val" id="b-obj"></div></div>
-    <div class="meta-item"><div class="meta-lbl">Difficulty</div><div class="meta-val" id="b-diff"></div></div>
-    <div class="meta-item"><div class="meta-lbl">Window</div><div class="meta-val" id="b-time"></div></div>
-  </div>
-  <div class="count-box">
-    <div class="count-label">— The Count —</div>
-    <div class="count-text" id="b-count"></div>
-  </div>
-  <button class="btn" onclick="showTools()">Select Your Tools</button>
-</div>
-
-<!-- S4: TOOLS -->
-<div id="s-tools" class="screen">
-  <div class="eyebrow">Equipment Bay</div>
-  <h2>Select Your Tools</h2>
-  <p class="tool-note">Choose exactly 2 tools. Your choices determine how the heist unfolds.</p>
-  <div class="sel-display" id="sel-display"><span style="color:var(--text-dim);font-size:.8rem">No tools selected</span></div>
-  <div class="tool-grid" id="tool-grid"></div>
-  <button class="btn" id="start-btn" onclick="startHeist()" disabled>Start Heist</button>
-</div>
-
-<!-- S5: HEIST -->
-<div id="s-heist" class="screen">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+<!-- Devroe overlay card -->
+<div id="devroe-card">
+  <div id="devroe-inner">
     <div>
-      <div class="eyebrow" id="h-phase"></div>
-      <h2 id="h-name"></h2>
+      <div class="devroe-txt">🎩 "Need a hand, Ms. Quest?"</div>
+      <div class="devroe-sub">Accept Devroe's help — all guards pause 4 seconds. Costs your ghost bonus.</div>
     </div>
-    <div class="tools-hud">Tools: <span id="h-tools"></span></div>
+    <div class="devroe-btns">
+      <button class="btn" id="devroe-yes">Y — Accept</button>
+      <button class="btn btn-red" id="devroe-no">N — Refuse</button>
+    </div>
   </div>
-  <div class="divider"></div>
-  <div class="sit-num" id="h-sitnum"></div>
-  <div class="dossier-card"><p id="h-sittext"></p></div>
-  <div id="h-outcome"></div>
-  <div class="choices" id="h-choices"></div>
 </div>
 
-<!-- S6: RESULT -->
-<div id="s-result" class="screen">
-  <div class="eyebrow" id="r-phase"></div>
-  <h2 id="r-name"></h2>
-  <div class="divider"></div>
-  <div id="r-badge"></div>
-  <div class="result-summary" id="r-summary"></div>
-  <div class="pts" id="r-pts"></div>
-  <div class="divider"></div>
-  <div id="r-event"></div>
-  <div id="r-next" style="margin-top:22px"></div>
-</div>
+<!-- UI SCREENS -->
+<div id="ui">
 
-<!-- S7: RANKINGS -->
-<div id="s-rankings" class="screen">
-  <div id="rank-content"></div>
-</div>
+  <!-- TITLE -->
+  <div id="s-title" class="screen active">
+    <div class="eyebrow">The Organization Presents</div>
+    <h1>THIEVES'<br>GAMBIT</h1>
+    <div class="ornament">— ✦ —</div>
+    <div class="subtitle">"Only one can win. Only one can wish."</div>
+    <div class="intro-block">
+      Ross Quest is seventeen years old and the best thief you've never heard of — until now. Her mother was taken mid-heist. The ransom: one billion dollars. Her only hope is winning the Thieves' Gambit — a brutal underground competition where the winner gets one wish from The Organization. Ross doesn't care about the glory. She just wants her mother back.
+    </div>
+    <button class="btn" onclick="showScreen('s-dossiers')">Enter the Gambit</button>
+  </div>
 
-</div><!-- /app -->
+  <!-- DOSSIERS -->
+  <div id="s-dossiers" class="screen">
+    <div class="eyebrow">Competitor Intelligence</div>
+    <h2>Know Your Rivals</h2>
+    <div class="rival-grid">
+      <div class="rival-card red">
+        <div class="r-avatar">🗡️</div>
+        <div class="r-name">Noelia Boschert</div>
+        <div class="r-tag">Threat Level: Critical</div>
+        <div class="r-bio">"Your childhood nemesis. Will sabotage you at any cost."</div>
+        <div class="r-hint">⚠ Races you to the loot. If she grabs it first, steal it back.</div>
+      </div>
+      <div class="rival-card">
+        <div class="r-avatar">🎩</div>
+        <div class="r-name">Devroe Kenzie</div>
+        <div class="r-tag">Threat Level: Unpredictable</div>
+        <div class="r-bio">"Charming British thief. Motives unknown. Dangerously attractive."</div>
+        <div class="r-hint">✦ Can pause all guards — for a price. Costs your ghost bonus.</div>
+      </div>
+      <div class="rival-card">
+        <div class="r-avatar">👁️</div>
+        <div class="r-name">Taiyō</div>
+        <div class="r-tag">Threat Level: Unknown</div>
+        <div class="r-bio">"Quiet. Methodical. The wildcard you didn't see coming."</div>
+        <div class="r-hint">👁 Watches. You'll never know what he sees.</div>
+      </div>
+    </div>
+    <button class="btn" onclick="beginLevel(0)">Begin Phase 1</button>
+  </div>
 
-<div id="hud">Score: <span id="hud-score">0</span></div>
+  <!-- LEVEL INTRO -->
+  <div id="s-intro" class="screen">
+    <div class="eyebrow" id="intro-phase">Phase 1 of 3</div>
+    <h2 id="intro-name">The Kenyan Vault</h2>
+    <div class="intro-meta">
+      <div class="meta-i"><div class="meta-l">Location</div><div class="meta-v" id="intro-loc"></div></div>
+      <div class="meta-i"><div class="meta-l">Difficulty</div><div class="meta-v" id="intro-diff"></div></div>
+      <div class="meta-i"><div class="meta-l">Guards</div><div class="meta-v" id="intro-guards"></div></div>
+    </div>
+    <div class="count-box">
+      <div class="count-lbl">— The Count —</div>
+      <div class="count-txt" id="intro-count"></div>
+    </div>
+    <div class="divider"></div>
+    <button class="btn" id="intro-btn" onclick="startLevel()">Begin Heist</button>
+  </div>
 
-<script>
-// ─── DATA ───────────────────────────────────────────────────
+  <!-- DEATH -->
+  <div id="s-death" class="screen">
+    <div class="big-red">SPOTTED</div>
+    <p style="color:var(--text-dim);margin:14px 0;font-style:italic">"Stay calm. Stay breathing. Get back in there."</p>
+    <div style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold-dim)" id="death-lives"></div>
+    <p style="color:var(--text-dim);font-size:.8rem;margin-top:16px">Respawning...</p>
+  </div>
 
-const TOOLS = [
-  {id:'lockpick', e:'🔓', n:'Lockpick',       d:'Bypasses locked doors and security panels'},
-  {id:'disguise', e:'🎭', n:'Disguise Kit',    d:'Lets you walk past guards undetected'},
-  {id:'grappling',e:'🪝', n:'Grappling Hook',  d:'Access rooftops, vents, and high entry points'},
-  {id:'hacking',  e:'💻', n:'Hacking Device',  d:'Disables cameras and electronic locks'},
-  {id:'smoke',    e:'💨', n:'Smoke Bomb',      d:'Creates chaos and covers an escape'},
-  {id:'ally',     e:'🤝', n:'Ally Call',       d:'Call Devroe or Taiyō for backup — risky, but powerful'},
-  {id:'mirror',   e:'🪞', n:'Mirror Bluff',    d:'A decoy object to swap with the target'},
-  {id:'emp',      e:'⏱️', n:'EMP Pulse',       d:'Kills all electronics in range for 60 seconds'},
-];
+  <!-- GAME OVER -->
+  <div id="s-gameover" class="screen">
+    <div class="big-red">GAME OVER</div>
+    <p style="color:var(--text-dim);margin:14px 0 24px;font-style:italic">"The Gambit is unforgiving. So is failure."</p>
+    <div class="stat-row"><span class="stat-label">Final Score</span><span class="stat-val" id="go-score">0</span></div>
+    <br>
+    <button class="btn" onclick="fullReset()">Try Again</button>
+  </div>
 
-const HEISTS = [
-  {
-    name:'The Kenyan Vault', loc:'Nairobi, Kenya', obj:'Extract the Okafor Diamond',
-    diff:'⭐⭐', time:'4-minute guard rotation',
-    count:'Welcome to the Gambit, Ms. Quest. Your first task is simple — if you\'re as good as your family name suggests. Extract the Okafor Diamond from a private vault in Nairobi. Security rotates every 4 minutes. You have one window. Don\'t waste it.',
-    sits:[
-      {
-        text:'You arrive at the estate under a moonless sky. The air smells like jacaranda and tension. A guard — broad-shouldered, alert — is blocking the service entrance. You have maybe ninety seconds before the next patrol sweeps this side of the grounds.',
-        choices:[
-          {l:'A', t:'Pick the side gate lock — silent entry, minimal risk.', tool:'lockpick',
-           good:'The tumblers yield in eleven seconds. You\'re inside before the guard even shifts his weight.',
-           bad:'The lock is reinforced. You\'re sweating through it when a second guard rounds the corner. You make it — barely.'},
-          {l:'B', t:'Bluff your way in as catering staff — bold, but effective.', tool:'disguise',
-           good:'The kit makes you look exactly like the rest of the crew. The guard waves you through without a second glance.',
-           bad:'You improvise — borrowed jacket, tray of empty glasses. The guard squints. You hold your breath. He waves you through. Lucky.'},
-          {l:'C', t:'Scale the perimeter wall to the roof — go high, go quiet.', tool:'grappling',
-           good:'The hook catches clean. You\'re on the roof in twenty seconds, invisible from the ground.',
-           bad:'You free-climb. Your arms burn. A security camera catches a blur at the top — you pray it was just blur.'},
-        ]
-      },
-      {
-        text:'You\'re inside. A camera mounted at the far end of the corridor sweeps the marble hallway every thirty seconds. The vault is at the end of that hallway. The camera is between you and it.',
-        choices:[
-          {l:'A', t:'Hack the camera feed — freeze it, walk right through.', tool:'hacking',
-           good:'Sixteen seconds to loop the feed. The camera sees what it saw three minutes ago. You walk through like you own the place.',
-           bad:'You jury-rig a signal block. The camera glitches for four seconds — enough to sprint halfway, then wait.'},
-          {l:'B', t:'Sprint between sweeps — pure timing, no tech.', tool:null,
-           good:'You count the rhythm, feel the beat of it — and move. You\'re past it before the lens turns back.',
-           bad:'You move too early. The camera catches your shadow. An alert pings somewhere deep in the building.'},
-          {l:'C', t:'Use a smoke bomb to blind the camera entirely.', tool:'smoke',
-           good:'A thin cloud fills the corridor. The camera sees white. You walk through at a stroll.',
-           bad:'The smoke triggers an air-quality sensor. A soft alarm sounds. You break into a run.'},
-        ]
-      },
-      {
-        text:'The vault. Beautiful — brushed steel, recessed behind a portrait of someone important. A biometric lock: fingerprint or retinal scan. You have neither on file. The diamond is twelve inches away.',
-        choices:[
-          {l:'A', t:'Mirror bluff — swap a perfect replica into position.', tool:'mirror',
-           good:'The replica slides in. The vault doesn\'t know the difference. You close it behind you. Clean exit.',
-           bad:'You try to dummy the sensor with a lifted print. It half-works. The vault opens but logs a silent alert.'},
-          {l:'B', t:'Force it with the EMP — kill the biometrics entirely.', tool:'emp',
-           good:'The pulse drops every electronic lock in a thirty-foot radius. The vault clicks open. Simple.',
-           bad:'Without the EMP you force the mechanism by hand. The door bends open — but it won\'t close again. Someone will know.'},
-          {l:'C', t:'Call your ally to remote-crack the biometric system.', tool:'ally',
-           good:'Devroe\'s voice in your earpiece: "Give me forty seconds." He delivers in thirty. The door swings open.',
-           bad:'No backup. You go old-school — stethoscope to the steel, listening for tumblers. It takes too long.'},
-        ]
-      }
-    ]
-  },
-  {
-    name:'The Tokyo Museum', loc:'Tokyo, Japan', obj:'Steal the Nakamura Scroll',
-    diff:'⭐⭐⭐', time:'3-hour gala window',
-    count:'Phase Two. The Nakamura Scroll has been on display in Tokyo for two hundred years. It will leave the museum in your bag tonight, or you will leave in handcuffs. The gala is in three hours. Dress accordingly.',
-    sits:[
-      {
-        text:'The gala is exactly what it looks like — champagne, old money, and a very small scroll in a very thick glass case at the center of the room. Every eye in the building has a clear line of sight to it. Security is subtle but everywhere. Noelia is here. You can feel it.',
-        choices:[
-          {l:'A', t:'Smoke bomb — cause a distraction, move in the chaos.', tool:'smoke',
-           good:'The crowd scatters. In twenty seconds of confusion you\'re at the case, the scroll is in your jacket, and you\'re already moving toward the exit.',
-           bad:'The smoke startles the room but security moves fast. You get the scroll but you\'re already flagged.'},
-          {l:'B', t:'Wear a disguise — pose as a curator transferring the piece.', tool:'disguise',
-           good:'You look the part down to the gloves and clipboard. The nearest guard actually holds the door for you.',
-           bad:'You wing it in borrowed formal wear. A real curator gives you a long look. You talk fast. It works. Barely.'},
-          {l:'C', t:'Wait for the lights to cut — you have a feeling they will.', tool:null,
-           good:'Three minutes later: darkness. Someone else wanted a distraction tonight. You move through the black and take what\'s yours.',
-           bad:'The lights don\'t cut. You wait too long. Now the crowd is thinning and you\'re more visible than before.'},
-        ]
-      },
-      {
-        text:'Noelia. Of course. She\'s already by the case, her hand moving with that practiced ease you\'ve hated since you were twelve. She\'s going for the scroll. Same scroll. Same moment. The room doesn\'t know it\'s watching two thieves work.',
-        choices:[
-          {l:'A', t:'Call your ally to intercept and delay Noelia.', tool:'ally',
-           good:'Devroe materializes at Noelia\'s elbow with a smile that could stop traffic. She\'s distracted for exactly long enough.',
-           bad:'No ally available. You fake a stumble into Noelia — it slows her, but she shoots you a look that promises consequences.'},
-          {l:'B', t:'Race her to the case — first one in wins.', tool:null,
-           good:'You move clean and fast. Noelia turns half a second too late. Your hand closes on the scroll first.',
-           bad:'You both reach it at the same moment. A brief, silent struggle. You win — but you\'ve burned time and she knows where you are.'},
-          {l:'C', t:'Let her take it — then steal it from her on the way out.', tool:null,
-           good:'Elegant. Let her do the work. You trail her through the gala exit and lift it clean from her bag in the stairwell.',
-           bad:'She\'s faster than you remembered. By the time you catch up she\'s already out — you have to run.'},
-        ]
-      },
-      {
-        text:'Alarms. Not the shrieking kind — the quiet, professional kind that means someone very competent pressed a button. The lobby is between you and the exit, and there are at least four security personnel moving to intercept.',
-        choices:[
-          {l:'A', t:'Grappling hook to the roof — go up and over.', tool:'grappling',
-           good:'The hook bites into the eave. You\'re on the roof in six seconds, running across tile in the rain, then gone.',
-           bad:'You free-climb the decorative facade. Slower, harder. You chip a nail on a gargoyle. But you make it.'},
-          {l:'B', t:'Hack the alarm panel — cut it at the source.', tool:'hacking',
-           good:'Twelve seconds of work. The alarm dies. Security relaxes. You walk out through the front door.',
-           bad:'You can\'t kill the alarm but you reroute the signal — they think the breach is in the east wing. You slip out the west.'},
-          {l:'C', t:'Smoke bomb the lobby — walk out in the confusion.', tool:'smoke',
-           good:'Smoke floods the lobby. Panic. In the chaos you\'re just another shadow moving toward fresh air.',
-           bad:'One smoke bomb and it\'s already gone. You grab a fire extinguisher off the wall. Messier, but it works.'},
-        ]
-      }
-    ]
-  },
-  {
-    name:'The Monaco Penthouse', loc:'Monaco Harbor', obj:'Retrieve the black-market ledger',
-    diff:'⭐⭐⭐', time:'Owner returns at midnight',
-    count:'The final phase. A black-market ledger sits in a penthouse safe overlooking Monaco harbor. It belongs to someone very dangerous. Retrieve it. The Organization will know if you open it. Don\'t open it.',
-    sits:[
-      {
-        text:'The elevator to the penthouse requires a keycard. The lobby of the Hotel de Paris is all marble and mirrors — beautiful, surveilled, and full of guests who would absolutely remember you. The penthouse button is right there. The door is closed.',
-        choices:[
-          {l:'A', t:'Pickpocket a hotel guest for their keycard.', tool:'lockpick',
-           good:'Your fingers move like water. The keycard is in your hand before the man finishes his sentence to the concierge.',
-           bad:'You lift the wrong card — housekeeping, not penthouse access. You bluff the elevator panel with it and get lucky.'},
-          {l:'B', t:'Hack the elevator panel directly.', tool:'hacking',
-           good:'The panel has a service override port. Fourteen seconds. You\'re ascending in silence.',
-           bad:'The hack takes twice as long as it should. The elevator stops at three wrong floors. You smile at every confused guest.'},
-          {l:'C', t:'Climb the outside of the building.', tool:'grappling',
-           good:'The harbor view from forty stories is spectacular. You try not to look down. The hook catches the penthouse railing perfectly.',
-           bad:'Without gear you use the maintenance ladder on the building\'s blind side. Rusted, swaying, terrifying. You make it.'},
-        ]
-      },
-      {
-        text:'The safe is behind an original Basquiat — predictable. The combination is unknown. A Koenig-Hartmann model, top of the line, biometric backup. The ledger is inside. The harbor glitters forty stories below the open window.',
-        choices:[
-          {l:'A', t:'EMP pulse — force the safe electronics offline.', tool:'emp',
-           good:'The pulse is surgical. The Koenig-Hartmann drops its entire electronic system. You crack the manual override in twenty seconds.',
-           bad:'No EMP. You go acoustic — fingers pressed against cold steel, listening for tumblers. Seven minutes. It ages you visibly.'},
-          {l:'B', t:'Mirror bluff — you brought a fake ledger to swap in.', tool:'mirror',
-           good:'The real ledger comes out, the fake goes in. The safe re-arms. Nobody will know the difference until it\'s far too late.',
-           bad:'No swap. You take the real ledger and leave the safe open. They\'ll know immediately — but you\'ll be in international waters by then.'},
-          {l:'C', t:'Call your ally — they know the owner personally.', tool:'ally',
-           good:'"Six-digit birthday, reversed." Devroe sounds almost bored. The safe opens on the first try.',
-           bad:'No ally. You research the owner on your phone in real time — Monaco records, public profiles. You find a combination. It works.'},
-        ]
-      },
-      {
-        text:'The owner. He wasn\'t supposed to be back until 1 AM. It is 11:47 PM. He is stepping off the private elevator, jacket over his arm, bodyguard behind him. The ledger is under your jacket. The balcony is to your left. The service stairs are to your right. He hasn\'t seen you. Yet.',
-        choices:[
-          {l:'A', t:'Hide with a smoke bomb — disappear until he passes.', tool:'smoke',
-           good:'The smoke fills the room before he takes two steps. You press into the en-suite, hold your breath. He coughs, curses, calls maintenance. You walk out behind the bodyguard.',
-           bad:'No smoke. You dive behind the wet bar and make yourself very small. The owner pours a drink eighteen inches from your face. He doesn\'t look down.'},
-          {l:'B', t:'Use your disguise — you\'re room service, obviously.', tool:'disguise',
-           good:'You step forward before he can process what he\'s seeing. "Evening turndown, sir." He waves you toward the door without a second glance.',
-           bad:'You bluff it raw — napkin over your arm, confidence in your spine. He frowns. You apologize for the wrong room. He lets you leave.'},
-          {l:'C', t:'Grappling hook off the balcony — right now, don\'t think.', tool:'grappling',
-           good:'The hook catches the harbor wall. The wind catches your jacket. You descend forty stories in eleven seconds, the ledger safe against your chest.',
-           bad:'You jump without gear. The decorative ironwork becomes your ladder — improvised, terrifying, and somehow enough.'},
-        ]
-      }
-    ]
-  }
-];
+  <!-- LEVEL COMPLETE -->
+  <div id="s-complete" class="screen">
+    <div class="eyebrow" id="comp-phase">Phase 1 Complete</div>
+    <h2 id="comp-name">The Kenyan Vault</h2>
+    <div class="divider"></div>
+    <div style="width:100%;max-width:400px">
+      <div class="stat-row"><span class="stat-label">Time</span><span class="stat-val" id="comp-time">0s</span></div>
+      <div class="stat-row"><span class="stat-label">Loot Collected</span><span class="stat-val" id="comp-loot">0</span></div>
+      <div class="stat-row"><span class="stat-label">Ghost Bonus</span><span class="stat-val" id="comp-ghost">+500</span></div>
+      <div class="stat-row"><span class="stat-label">Level Score</span><span class="stat-val" id="comp-pts">0</span></div>
+      <div class="stat-row" style="border-bottom:none"><span class="stat-label">Running Total</span><span class="stat-val" id="comp-total">0</span></div>
+    </div>
+    <div class="divider"></div>
+    <button class="btn" id="comp-btn">Next Heist</button>
+  </div>
 
-const EVENTS = [
-  {id:'noelia-tip',  chr:'Noelia Boschert', cls:'', lbl:'⚡ Rival Event',
-   txt:'"You thought you were the only one with contacts?" She tipped off security at your next location. Your approach window just got shorter.',
-   eff:-20, note:'–20 points'},
-  {id:'noelia-tool', chr:'Noelia Boschert', cls:'', lbl:'⚡ Rival Event',
-   txt:'She got to your equipment before you did. One of your tools has been compromised for the next heist.',
-   eff:'lose_tool', note:'Lose 1 tool next round'},
-  {id:'devroe-intel',chr:'Devroe Kenzie',   cls:'pos', lbl:'✦ Intel Received',
-   txt:'"Heard something you might find useful." He slides a folded note across the table without making eye contact. The intel is good. Very good.',
-   eff:15, note:'+15 points'},
-  {id:'devroe-allie',chr:'Devroe Kenzie',   cls:'pos', lbl:'✦ Alliance Offered',
-   txt:'"I\'m not your enemy, Ross." He offers his hand. An alliance — information sharing, mutual protection. There\'s a catch. There\'s always a catch.',
-   eff:'alliance', note:'Your choice'},
-  {id:'taiyo-watch', chr:'Taiyō',           cls:'', lbl:'👁 Observed',
-   txt:'He said nothing. Did nothing. But across the briefing room you caught him watching you — not the way rivals watch rivals. The way someone watches something they\'re trying to understand.',
-   eff:0, note:'No effect'},
-  {id:'org-trivia',  chr:'The Organization',cls:'pos', lbl:'✦ Surprise Assessment',
-   txt:'The Organization is watching more closely than you thought. They have a question.',
-   eff:'trivia', note:'+25 points if correct'},
-];
-
-const TRIVIA = [
-  {q:'What term describes a thief who specializes in picking pockets?',
-   opts:['Cracksman','Dip','Grafter','Prowler'], ans:1},
-  {q:'The 2003 Antwerp Diamond Heist is notable for what reason?',
-   opts:['It used laser cutters','Thieves tunneled in over a weekend','It was an inside job by staff','No one was ever caught'],ans:3},
-  {q:'In sleight of hand, what does "palming" mean?',
-   opts:['A type of safe lock','Concealing an object in the hand','A distraction technique','A forgery method'],ans:1},
-];
-
-// ─── STATE ──────────────────────────────────────────────────
-
-let G = {};
-
-function freshState() {
-  return {
-    hi: 0,          // heist index 0-2
-    score: 0,
-    drawn: [],      // 5 drawn tools
-    picked: [],     // 2 selected tools
-    sitIdx: 0,
-    wins: 0,        // successes this heist
-    results: [],
-    usedEvents: new Set(),
-    lostToolId: null,
-    alliance: false,
-    triviaUp: false,
-  };
-}
-
-// ─── UTILS ──────────────────────────────────────────────────
-
-function go(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function shuffle(a) {
-  const b = [...a];
-  for (let i = b.length-1; i>0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [b[i],b[j]] = [b[j],b[i]];
-  }
-  return b;
-}
-
-function setHUD() {
-  document.getElementById('hud').style.display = 'block';
-  document.getElementById('hud-score').textContent = G.score;
-}
-
-// ─── GAME START ─────────────────────────────────────────────
-
-function startGame() {
-  G = freshState();
-  loadBriefing();
-}
-
-function loadBriefing() {
-  const h = HEISTS[G.hi];
-  document.getElementById('b-phase').textContent = `Phase ${G.hi+1} of 3`;
-  document.getElementById('b-name').textContent = h.name;
-  document.getElementById('b-loc').textContent = h.loc;
-  document.getElementById('b-obj').textContent = h.obj;
-  document.getElementById('b-diff').textContent = h.diff;
-  document.getElementById('b-time').textContent = h.time;
-  document.getElementById('b-count').textContent = h.count;
-  go('s-briefing');
-}
-
-// ─── TOOLS ──────────────────────────────────────────────────
-
-function showTools() {
-  let pool = TOOLS.filter(t => t.id !== G.lostToolId);
-  G.drawn = shuffle(pool).slice(0, 5);
-  G.picked = [];
-  renderToolGrid();
-  go('s-tools');
-}
-
-function renderToolGrid() {
-  const grid = document.getElementById('tool-grid');
-  grid.innerHTML = '';
-  G.drawn.forEach(t => {
-    const c = document.createElement('div');
-    c.className = 'tool-card';
-    c.id = 'tc-' + t.id;
-    c.innerHTML = `<div class="t-emoji">${t.e}</div><div class="t-name">${t.n}</div><div class="t-desc">${t.d}</div>`;
-    c.addEventListener('click', () => toggleTool(t.id));
-    grid.appendChild(c);
-  });
-  updateSelDisplay();
-}
-
-function toggleTool(id) {
-  const idx = G.picked.indexOf(id);
-  if (idx >= 0) {
-    G.picked.splice(idx, 1);
-  } else {
-    if (G.picked.length >= 2) return;
-    G.picked.push(id);
-  }
-  updateSelDisplay();
-}
-
-function updateSelDisplay() {
-  G.drawn.forEach(t => {
-    const el = document.getElementById('tc-' + t.id);
-    if (el) el.classList.toggle('selected', G.picked.includes(t.id));
-  });
-  const disp = document.getElementById('sel-display');
-  const btn  = document.getElementById('start-btn');
-  if (G.picked.length === 0) {
-    disp.innerHTML = '<span style="color:var(--text-dim);font-size:.8rem">No tools selected</span>';
-  } else {
-    disp.innerHTML = G.picked.map(id => {
-      const t = TOOLS.find(x => x.id === id);
-      return `<span class="sel-tag">${t.e} ${t.n}</span>`;
-    }).join('');
-  }
-  btn.disabled = G.picked.length < 2;
-}
-
-// ─── HEIST ──────────────────────────────────────────────────
-
-function startHeist() {
-  if (G.picked.length < 2) return;
-  G.sitIdx = 0;
-  G.wins   = 0;
-  const h  = HEISTS[G.hi];
-  document.getElementById('h-name').textContent = h.name;
-  document.getElementById('h-tools').textContent =
-    G.picked.map(id => { const t = TOOLS.find(x=>x.id===id); return `${t.e} ${t.n}`; }).join(' · ');
-  setHUD();
-  renderSit();
-  go('s-heist');
-}
-
-function renderSit() {
-  const h   = HEISTS[G.hi];
-  const sit = h.sits[G.sitIdx];
-  const n   = G.sitIdx + 1;
-  document.getElementById('h-phase').textContent  = `Phase ${G.hi+1} — Situation ${n} of 3`;
-  document.getElementById('h-sitnum').textContent  = `SITUATION ${n}`;
-  document.getElementById('h-sittext').textContent = sit.text;
-  document.getElementById('h-outcome').innerHTML   = '';
-
-  const box = document.getElementById('h-choices');
-  box.innerHTML = '';
-
-  sit.choices.forEach(ch => {
-    const hasTool = ch.tool && G.picked.includes(ch.tool);
-    const toolObj = ch.tool ? TOOLS.find(x => x.id === ch.tool) : null;
-    const btn = document.createElement('button');
-    btn.className = 'choice';
-    btn.innerHTML = `
-      <span class="ch-letter">${ch.l}</span>
-      <span class="ch-body">
-        <span class="ch-text">${ch.t}</span>
-        ${hasTool ? `<div class="ch-hint">${toolObj.e} Optimal with ${toolObj.n}</div>` : ''}
-      </span>`;
-    btn.addEventListener('click', () => choose(ch, hasTool));
-    box.appendChild(btn);
-  });
-}
-
-function choose(ch, hasTool) {
-  document.querySelectorAll('.choice').forEach(b => b.disabled = true);
-
-  let ok;
-  if (hasTool)         ok = true;
-  else if (!ch.tool)   ok = Math.random() < 0.5;
-  else                 ok = Math.random() < 0.35;
-
-  if (ok) G.wins++;
-
-  const out = document.getElementById('h-outcome');
-  const div = document.createElement('div');
-  div.className = 'outcome' + (ok ? '' : ' bad');
-  div.textContent = ok ? ch.good : ch.bad;
-  out.appendChild(div);
-
-  setTimeout(() => {
-    G.sitIdx++;
-    if (G.sitIdx < 3) renderSit();
-    else              showResult();
-  }, 2100);
-}
-
-// ─── RESULT ─────────────────────────────────────────────────
-
-function showResult() {
-  const h = HEISTS[G.hi];
-  let grade, pts, lines;
-  if (G.wins === 3) {
-    grade='ghost'; pts=100;
-    lines='You didn\'t leave a fingerprint. Not even metaphorically. The Gambit judges are watching the replay and finding nothing. That\'s the point.';
-  } else if (G.wins === 2) {
-    grade='close'; pts=60;
-    lines='It was messier than you wanted. But the objective is secured. You got the job done — just louder than you\'d like.';
-  } else {
-    grade='burned'; pts=20;
-    lines='You got out. The target is in your hands. But they know your face now. A win, technically. Technically.';
-  }
-  G.score += pts;
-  G.results.push({grade, pts});
-  setHUD();
-
-  document.getElementById('r-phase').textContent = `Phase ${G.hi+1} — Complete`;
-  document.getElementById('r-name').textContent  = h.name;
-  const labels = {ghost:'GHOST', close:'CLOSE CALL', burned:'BURNED'};
-  document.getElementById('r-badge').innerHTML   = `<div class="badge ${grade}">${labels[grade]}</div>`;
-  document.getElementById('r-summary').textContent = lines;
-  document.getElementById('r-pts').textContent   = `+${pts} points  ·  Running total: ${G.score}`;
-
-  document.getElementById('r-event').innerHTML = '';
-  document.getElementById('r-next').innerHTML  = '';
-  triggerEvent();
-  go('s-result');
-}
-
-// ─── RIVAL EVENTS ───────────────────────────────────────────
-
-function triggerEvent() {
-  const available = EVENTS.filter(e => !G.usedEvents.has(e.id));
-  const ev = available.length ? available[Math.floor(Math.random()*available.length)] : EVENTS[0];
-  G.usedEvents.add(ev.id);
-
-  const area = document.getElementById('r-event');
-  const next = document.getElementById('r-next');
-
-  const card = document.createElement('div');
-  card.className = 'event-card' + (ev.cls ? ' '+ev.cls : '');
-  card.innerHTML = `<div class="event-lbl">${ev.lbl} — ${ev.chr}</div><div class="event-txt">${ev.txt}</div>`;
-  area.appendChild(card);
-
-  if (ev.eff === 'alliance') {
-    const row = document.createElement('div');
-    row.className = 'alliance-row';
-    row.innerHTML = `
-      <button class="btn" id="accept-btn">Accept Alliance</button>
-      <button class="btn btn-red" id="refuse-btn">Refuse</button>`;
-    card.appendChild(row);
-    document.getElementById('accept-btn').addEventListener('click', () => {
-      G.score += 20; G.alliance = true; setHUD();
-      row.innerHTML = '<p style="color:var(--gold);font-size:.85rem;font-style:italic;margin-top:8px">He nods. "Smart choice." The alliance is fragile — but it\'s something. +20 points.</p>';
-      renderNextBtn(next);
-    });
-    document.getElementById('refuse-btn').addEventListener('click', () => {
-      row.innerHTML = '<p style="color:var(--text-dim);font-size:.85rem;font-style:italic;margin-top:8px">"Your loss." He shrugs and walks away. You feel his eyes on your back all evening.</p>';
-      renderNextBtn(next);
-    });
-  } else if (ev.eff === 'trivia') {
-    renderTrivia(card, next);
-  } else {
-    if (typeof ev.eff === 'number' && ev.eff !== 0) {
-      G.score = Math.max(0, G.score + ev.eff);
-      setHUD();
-      document.getElementById('r-pts').textContent = `Running total: ${G.score}`;
-    } else if (ev.eff === 'lose_tool') {
-      const rand = TOOLS[Math.floor(Math.random()*TOOLS.length)];
-      G.lostToolId = rand.id;
-      const note = document.createElement('p');
-      note.style.cssText = 'color:var(--crimson-b);font-size:.82rem;font-style:italic;margin-top:8px';
-      note.textContent = `The ${rand.n} has been removed from your available tools next heist.`;
-      card.appendChild(note);
-    }
-    renderNextBtn(next);
-  }
-}
-
-function renderTrivia(card, next) {
-  const q = TRIVIA[Math.floor(Math.random()*TRIVIA.length)];
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `<p style="margin-top:13px;font-size:.9rem;font-weight:500;color:var(--gold)">${q.q}</p>
-    <div class="trivia-opts" id="t-opts"></div>
-    <div id="t-res" style="margin-top:9px;font-size:.84rem;font-style:italic"></div>`;
-  card.appendChild(wrap);
-  const opts = wrap.querySelector('#t-opts');
-  q.opts.forEach((o,i) => {
-    const b = document.createElement('button');
-    b.className = 't-opt';
-    b.textContent = o;
-    b.addEventListener('click', () => {
-      if (G.triviaUp) return;
-      G.triviaUp = true;
-      opts.querySelectorAll('.t-opt').forEach((x,j) => {
-        x.disabled = true;
-        if (j === q.ans) x.classList.add('correct');
-        else if (j === i) x.classList.add('wrong');
-      });
-      const res = wrap.querySelector('#t-res');
-      if (i === q.ans) {
-        G.score += 25; setHUD();
-        res.style.color = 'var(--gold)';
-        res.textContent = 'Correct. The Organization is impressed. +25 points.';
-      } else {
-        res.style.color = 'var(--crimson-b)';
-        res.textContent = 'Wrong. The Organization notes your gaps.';
-      }
-      renderNextBtn(next);
-    });
-    opts.appendChild(b);
-  });
-}
-
-function renderNextBtn(next) {
-  const isLast = G.hi >= 2;
-  const btn = document.createElement('button');
-  btn.className = 'btn';
-  btn.textContent = isLast ? 'View Final Rankings' : `Begin Phase ${G.hi+2}`;
-  btn.addEventListener('click', () => {
-    G.hi++;
-    G.lostToolId = G.lostToolId; // persists one heist
-    if (G.hi >= 3) showRankings();
-    else { G.lostToolId = null; loadBriefing(); }
-  });
-  next.appendChild(btn);
-}
-
-// ─── RANKINGS ───────────────────────────────────────────────
-
-function showRankings() {
-  document.getElementById('hud').style.display = 'none';
-
-  let nScore = 210, dScore = 185, tScore = 170;
-  if (G.usedEvents.has('noelia-tip'))  nScore += 8;
-  if (G.usedEvents.has('noelia-tool')) nScore += 5;
-  if (G.alliance)                      dScore -= 10;
-
-  const board = [
-    {name:'Ross Quest',       score:G.score,         me:true},
-    {name:'Noelia Boschert',  score:Math.round(nScore)},
-    {name:'Devroe Kenzie',    score:Math.round(dScore)},
-    {name:'Taiyō',            score:Math.round(tScore)},
-  ].sort((a,b) => b.score - a.score);
-
-  const rossPos = board.findIndex(r => r.me) + 1;
-  const won = rossPos === 1;
-
-  const medals = ['🥇','🥈','🥉','4th'];
-  let html = `
+  <!-- RANKINGS -->
+  <div id="s-rankings" class="screen">
     <div class="eyebrow">The Gambit — Final Results</div>
     <h2>Leaderboard</h2>
     <div class="divider"></div>
     <div class="lb">
       <div class="lb-head"><div>Rank</div><div>Competitor</div><div style="text-align:right">Score</div></div>
-  `;
+      <div id="lb-body"></div>
+    </div>
+    <div id="rank-verdict"></div>
+    <button class="btn" onclick="fullReset()" style="margin-top:16px">Play Again</button>
+  </div>
+
+</div><!-- /ui -->
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════
+// LEVEL DATA
+// ═══════════════════════════════════════════════
+
+const LEVEL_DEFS = [
+  {
+    name: 'The Kenyan Vault',
+    phase: 'Phase 1 of 3',
+    loc: 'Nairobi, Kenya',
+    diff: '⭐⭐',
+    guardCount: '3 Guards',
+    count: 'The Okafor Diamond. A private estate outside Nairobi. Three guards, one window. Don\'t embarrass the Quest name.',
+    objective: 'Collect the Diamond',
+    objectiveAfter: 'Reach the Exit',
+    smokeBombs: 2,
+    bgColor: '#0e0c08',
+    // World is 2400 wide, 600 tall (canvas coords)
+    platforms: [
+      // ground
+      {x:0,   y:520, w:2400, h:80, col:'#1a1508'},
+      // raised platforms
+      {x:200, y:400, w:160,  h:18, col:'#1e1a0e'},
+      {x:480, y:340, w:200,  h:18, col:'#1e1a0e'},
+      {x:760, y:420, w:140,  h:18, col:'#1e1a0e'},
+      {x:980, y:360, w:180,  h:18, col:'#1e1a0e'},
+      {x:1220,y:300, w:160,  h:18, col:'#1e1a0e'},
+      {x:1460,y:380, w:200,  h:18, col:'#1e1a0e'},
+      {x:1720,y:430, w:160,  h:18, col:'#1e1a0e'},
+      {x:1960,y:360, w:180,  h:18, col:'#1e1a0e'},
+      // vault ledge
+      {x:2100,y:440, w:300,  h:18, col:'#221800'},
+      // walls (thin vertical blockers)
+      {x:0,   y:0,   w:20,   h:520,col:'#0e0c08'},
+      {x:2380,y:0,   w:20,   h:520,col:'#0e0c08'},
+    ],
+    guards: [
+      {x:350, y:490, patrolLeft:220, patrolRight:520, speed:60},
+      {x:900, y:490, patrolLeft:700, patrolRight:1100,speed:70},
+      {x:1600,y:490, patrolLeft:1400,patrolRight:1800,speed:65},
+    ],
+    loot: {x:2200, y:405, label:'💎'},
+    bonusLoot:[
+      {x:600,  y:310, label:'💍', pts:50},
+      {x:1300, y:268, label:'💍', pts:50},
+    ],
+    exit: {x:30, y:460},
+    rossStart: {x:60, y:470},
+    noelia: null,
+    devroe: false,
+    searchlights: [],
+    lasers: [],
+  },
+  {
+    name: 'The Tokyo Museum',
+    phase: 'Phase 2 of 3',
+    loc: 'Tokyo, Japan',
+    diff: '⭐⭐⭐',
+    guardCount: '5 Guards',
+    count: 'The Nakamura Scroll. 200 years old. A gala full of witnesses. Noelia is already inside. Move.',
+    objective: 'Collect the Scroll',
+    objectiveAfter: 'Reach the Exit',
+    smokeBombs: 2,
+    bgColor: '#08080e',
+    platforms: [
+      // ground floor
+      {x:0,   y:520, w:2400, h:80, col:'#0d0d18'},
+      // floor 2 ceiling/floor slab
+      {x:0,   y:280, w:2400, h:20, col:'#111128'},
+      // floor 1 mid platforms
+      {x:180, y:420, w:160,  h:18, col:'#14142a'},
+      {x:500, y:380, w:180,  h:18, col:'#14142a'},
+      {x:800, y:430, w:160,  h:18, col:'#14142a'},
+      {x:1100,y:390, w:200,  h:18, col:'#14142a'},
+      {x:1400,y:440, w:160,  h:18, col:'#14142a'},
+      {x:1700,y:400, w:180,  h:18, col:'#14142a'},
+      {x:2000,y:450, w:160,  h:18, col:'#14142a'},
+      // stairs/ladder zone (thin steps)
+      {x:1140,y:460, w:40,   h:18, col:'#1e1e3a'},
+      {x:1140,y:400, w:40,   h:18, col:'#1e1e3a'},
+      {x:1140,y:340, w:40,   h:18, col:'#1e1e3a'},
+      {x:1140,y:298, w:40,   h:18, col:'#1e1e3a'},
+      // floor 2 platforms
+      {x:0,   y:180, w:500,  h:18, col:'#14142a'},
+      {x:600, y:200, w:180,  h:18, col:'#14142a'},
+      {x:860, y:180, w:220,  h:18, col:'#14142a'},
+      {x:1300,y:200, w:180,  h:18, col:'#14142a'},
+      {x:1560,y:180, w:200,  h:18, col:'#14142a'},
+      {x:1840,y:200, w:180,  h:18, col:'#14142a'},
+      {x:2100,y:180, w:300,  h:18, col:'#14142a'},
+      // walls
+      {x:0,   y:0,   w:20,   h:520,col:'#08080e'},
+      {x:2380,y:0,   w:20,   h:520,col:'#08080e'},
+    ],
+    guards: [
+      {x:300, y:490, patrolLeft:80,  patrolRight:550, speed:55},
+      {x:900, y:490, patrolLeft:600, patrolRight:1100,speed:65},
+      {x:1800,y:490, patrolLeft:1500,patrolRight:2100,speed:60},
+      {x:400, y:250, patrolLeft:80,  patrolRight:700, speed:70},
+      {x:1700,y:250, patrolLeft:1300,patrolRight:2100,speed:75},
+    ],
+    loot: {x:1200, y:245, label:'📜'},
+    bonusLoot:[
+      {x:650,  y:165, label:'💍', pts:50},
+      {x:1900, y:165, label:'💍', pts:50},
+    ],
+    exit: {x:30, y:460},
+    rossStart: {x:60, y:490},
+    noelia: {x:2300, y:250, patrolTarget:1200, speed:85},
+    devroe: true,
+    devroeFloor: 2, // triggers when ross reaches y < 300
+    searchlights: [
+      {x:700, y:280, angle:0, speed:0.6, range:180, width:40},
+      {x:1600,y:280, angle:Math.PI, speed:0.7, range:180, width:40},
+    ],
+    lasers: [],
+  },
+  {
+    name: 'The Monaco Penthouse',
+    phase: 'Phase 3 of 3',
+    loc: 'Monaco Harbor',
+    diff: '⭐⭐⭐',
+    guardCount: '6 Guards',
+    count: 'The Monaco Ledger. Penthouse suite. Someone very dangerous owns it. Retrieve it. Don\'t open it. Don\'t get caught. Don\'t die.',
+    objective: 'Collect the Ledger',
+    objectiveAfter: 'Reach the Exit',
+    smokeBombs: 3,
+    bgColor: '#060810',
+    platforms: [
+      // ground
+      {x:0,   y:520, w:2400, h:80, col:'#0a0c14'},
+      // floor 2
+      {x:0,   y:340, w:2400, h:20, col:'#0c0e1c'},
+      // floor 3
+      {x:0,   y:160, w:2400, h:20, col:'#0c0e1c'},
+      // floor 1 platforms
+      {x:200, y:440, w:160,  h:18, col:'#10122a'},
+      {x:500, y:400, w:180,  h:18, col:'#10122a'},
+      {x:850, y:450, w:160,  h:18, col:'#10122a'},
+      {x:1150,y:410, w:180,  h:18, col:'#10122a'},
+      {x:1500,y:440, w:160,  h:18, col:'#10122a'},
+      {x:1800,y:400, w:200,  h:18, col:'#10122a'},
+      // stairs left (all floors)
+      {x:60,  y:460, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:400, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:340, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:300, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:260, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:220, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:180, w:40,   h:18, col:'#14163a'},
+      {x:60,  y:160, w:40,   h:18, col:'#14163a'},
+      // floor 2 platforms
+      {x:200, y:260, w:200,  h:18, col:'#10122a'},
+      {x:520, y:280, w:180,  h:18, col:'#10122a'},
+      {x:850, y:260, w:200,  h:18, col:'#10122a'},
+      {x:1150,y:280, w:160,  h:18, col:'#10122a'},
+      {x:1460,y:260, w:200,  h:18, col:'#10122a'},
+      {x:1760,y:280, w:180,  h:18, col:'#10122a'},
+      {x:2050,y:260, w:200,  h:18, col:'#10122a'},
+      // floor 3 platforms
+      {x:200, y:100, w:200,  h:18, col:'#10122a'},
+      {x:520, y:120, w:160,  h:18, col:'#10122a'},
+      {x:820, y:100, w:200,  h:18, col:'#10122a'},
+      {x:1100,y:120, w:160,  h:18, col:'#10122a'},
+      {x:1380,y:100, w:180,  h:18, col:'#10122a'},
+      {x:1650,y:120, w:160,  h:18, col:'#10122a'},
+      {x:1900,y:100, w:300,  h:18, col:'#10122a'},
+      // walls
+      {x:0,   y:0,   w:20,   h:520,col:'#060810'},
+      {x:2380,y:0,   w:20,   h:520,col:'#060810'},
+    ],
+    guards: [
+      {x:400, y:490, patrolLeft:100, patrolRight:700, speed:60},
+      {x:1200,y:490, patrolLeft:800, patrolRight:1600,speed:65},
+      {x:1900,y:490, patrolLeft:1600,patrolRight:2200,speed:60},
+      {x:500, y:310, patrolLeft:200, patrolRight:900, speed:70},
+      {x:1500,y:310, patrolLeft:1000,patrolRight:2000,speed:75},
+      {x:1200,y:130, patrolLeft:800, patrolRight:1800,speed:80},
+    ],
+    loot: {x:2100, y:115, label:'📒'},
+    bonusLoot:[
+      {x:600,  y:90,  label:'💍', pts:50},
+      {x:1400, y:90,  label:'💍', pts:50},
+    ],
+    exit: {x:2320, y:460},
+    rossStart: {x:80, y:490},
+    noelia: {x:2300, y:130, patrolTarget:2100, speed:90},
+    devroe: true,
+    devroeFloor: 2,
+    searchlights: [
+      {x:600, y:160, angle:0,        speed:0.8, range:170, width:35},
+      {x:1400,y:160, angle:Math.PI,  speed:0.9, range:170, width:35},
+    ],
+    lasers: [
+      {x:900, y:118, w:200, h:6, moving:false},
+      {x:1200,y:130, w:160, h:6, moving:false},
+    ],
+  }
+];
+
+// ═══════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════
+
+const G = {
+  levelIdx: 0,
+  score: 0,
+  lives: 3,
+  running: false,
+  paused: false,
+  devroeShown: false,
+  devroeUsed: false,
+};
+
+let level      = null;  // current level def
+let ross       = null;
+let guards     = [];
+let bonusItems = [];
+let lootItem   = null;
+let exitPoint  = null;
+let noelia     = null;
+let searchlights = [];
+let lasers     = [];
+
+let smokeBombs   = 2;
+let ghostStatus  = true;
+let levelStart   = 0;
+let hasLoot      = false;
+let levelScore   = 0;
+let smokeActive  = false;
+let smokeTimer   = 0;
+let devroeTimer  = 0; // countdown after accepted
+
+// camera
+let camX = 0;
+
+// input
+const KEYS = {};
+document.addEventListener('keydown', e => {
+  KEYS[e.code] = true;
+  if (e.code === 'Space') e.preventDefault();
+  if (e.code === 'KeyY' && G.paused) acceptDevroe();
+  if (e.code === 'KeyN' && G.paused) refuseDevroe();
+});
+document.addEventListener('keyup', e => { KEYS[e.code] = false; });
+
+// ═══════════════════════════════════════════════
+// CANVAS SETUP
+// ═══════════════════════════════════════════════
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W, H, SCALE = 1;
+const WORLD_W = 2400, WORLD_H = 600;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  // uniform scale: fit world height to canvas, letterbox width
+  SCALE = H / WORLD_H;
+}
+window.addEventListener('resize', () => { resize(); });
+resize();
+
+// ═══════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ═══════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function showHUD(on) {
+  document.getElementById('hud').style.display = on ? 'block' : 'none';
+}
+
+function updateHUD() {
+  document.getElementById('h-score').textContent = G.score;
+  document.getElementById('h-level').textContent = level.name;
+  document.getElementById('h-obj').textContent   = hasLoot ? level.objectiveAfter : level.objective;
+  document.getElementById('h-lives').textContent = '🕵️'.repeat(Math.max(0, G.lives));
+  document.getElementById('h-smoke').textContent = '💨'.repeat(Math.max(0, smokeBombs));
+  const ghost = document.getElementById('h-ghost');
+  ghost.textContent = ghostStatus ? '◆ GHOST' : '◇ SPOTTED';
+  ghost.className   = 'hud-ghost ' + (ghostStatus ? 'ghost-ok' : 'ghost-lost');
+}
+
+// ═══════════════════════════════════════════════
+// LEVEL INIT
+// ═══════════════════════════════════════════════
+
+function beginLevel(idx) {
+  G.levelIdx = idx;
+  level = LEVEL_DEFS[idx];
+
+  document.getElementById('intro-phase').textContent  = level.phase;
+  document.getElementById('intro-name').textContent   = level.name;
+  document.getElementById('intro-loc').textContent    = level.loc;
+  document.getElementById('intro-diff').textContent   = level.diff;
+  document.getElementById('intro-guards').textContent = level.guardCount;
+  document.getElementById('intro-count').textContent  = level.count;
+  showScreen('s-intro');
+}
+
+function startLevel() {
+  showScreen(''); // hide all screens
+  showHUD(true);
+  initLevelObjects();
+  G.running = true;
+  G.paused  = false;
+  G.devroeShown = false;
+  levelStart = performance.now();
+  hintStart  = (performance.now() - t0) / 1000; // world-time when level starts
+  lastTime   = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function initLevelObjects() {
+  level = LEVEL_DEFS[G.levelIdx];
+  smokeBombs  = level.smokeBombs;
+  ghostStatus = true;
+  hasLoot     = false;
+  levelScore  = 0;
+  smokeActive = false;
+  smokeTimer  = 0;
+  devroeTimer = 0;
+  camX        = 0;
+
+  // Ross
+  const rs = level.rossStart;
+  ross = {
+    x: rs.x, y: rs.y,
+    w: 20, h: 32,
+    vx: 0, vy: 0,
+    onGround: false,
+    crouching: false,
+    facing: 1,       // 1=right, -1=left
+    jumpHeld: 0,     // frames jump key held
+    alive: true,
+    // crouch dims
+    normalH: 32,
+    crouchH: 20,
+  };
+
+  // Guards
+  guards = level.guards.map(gd => ({
+    x: gd.x, y: gd.y,
+    w: 22, h: 32,
+    patrolLeft:  gd.patrolLeft,
+    patrolRight: gd.patrolRight,
+    speed: gd.speed,
+    dir: 1,
+    state: 'patrol',   // patrol | suspicious | alert
+    stateTimer: 0,
+    visionAngle: Math.PI * 0.35,
+    visionRange: 180,
+    alertColor: 'rgba(139,26,26,0.28)',
+    suspColor:  'rgba(201,168,76,0.18)',
+    patrolColor:'rgba(80,80,80,0.12)',
+  }));
+
+  // Bonus loot
+  bonusItems = (level.bonusLoot || []).map(b => ({...b, collected:false}));
+
+  // Main loot
+  const lt = level.loot;
+  lootItem = {x:lt.x, y:lt.y - 24, w:24, h:24, label:lt.label, collected:false};
+
+  // Exit
+  const ex = level.exit;
+  exitPoint = {x:ex.x, y:ex.y, w:40, h:40, active:false};
+
+  // Noelia
+  noelia = null;
+  if (level.noelia) {
+    const nd = level.noelia;
+    noelia = {
+      x: nd.x, y: nd.y,
+      w: 20, h: 32,
+      vx: 0, vy: 0,
+      onGround: false,
+      target: nd.patrolTarget,
+      speed: nd.speed,
+      hasLoot: false,
+      state: 'chase', // chase | returning
+    };
+  }
+
+  // Searchlights
+  searchlights = (level.searchlights || []).map(sl => ({
+    ...sl,
+    currentAngle: sl.angle,
+    dir: 1,
+    sweepMin: sl.angle - sl.range * Math.PI / 360,
+    sweepMax: sl.angle + sl.range * Math.PI / 360,
+  }));
+
+  // Lasers
+  lasers = (level.lasers || []).map(l => ({...l}));
+}
+
+// ═══════════════════════════════════════════════
+// PHYSICS HELPERS
+// ═══════════════════════════════════════════════
+
+function aabb(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function platformCollide(entity) {
+  entity.onGround = false;
+  const plats = level.platforms;
+  for (const p of plats) {
+    if (!aabb(entity, p)) continue;
+    const overlapX = Math.min(entity.x + entity.w, p.x + p.w) - Math.max(entity.x, p.x);
+    const overlapY = Math.min(entity.y + entity.h, p.y + p.h) - Math.max(entity.y, p.y);
+    if (overlapX > overlapY) {
+      if (entity.vy >= 0 && entity.y + entity.h - entity.vy <= p.y + 2) {
+        entity.y = p.y - entity.h;
+        entity.vy = 0;
+        entity.onGround = true;
+      } else if (entity.vy < 0) {
+        entity.y = p.y + p.h;
+        entity.vy = 0;
+      }
+    } else {
+      if (entity.vx > 0) entity.x = p.x - entity.w;
+      else                entity.x = p.x + p.w;
+      entity.vx = 0;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// GAME LOOP
+// ═══════════════════════════════════════════════
+
+let lastTime = 0;
+
+function loop(ts) {
+  if (!G.running) return;
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts;
+
+  if (!G.paused) {
+    update(dt);
+  }
+  render();
+  updateHUD();
+  requestAnimationFrame(loop);
+}
+
+// ═══════════════════════════════════════════════
+// UPDATE
+// ═══════════════════════════════════════════════
+
+const GRAVITY    = 1400;
+const MOVE_SPEED = 160;
+const JUMP_FORCE = 480;
+const JUMP_HOLD  = 0.18; // seconds extra hold boosts jump
+
+function update(dt) {
+  if (!ross.alive) return;
+
+  updateRoss(dt);
+  updateGuards(dt);
+  updateNoelia(dt);
+  updateSearchlights(dt);
+  updateSmoke(dt);
+  updateDevroe();
+  checkLoot();
+  checkExit();
+  checkGuardContact();
+
+  // camera follows ross in world units, accounting for scale
+  const viewW = W / SCALE;
+  camX = Math.max(0, Math.min(WORLD_W - viewW, ross.x - viewW / 2 + ross.w / 2));
+}
+
+function updateRoss(dt) {
+  const cr = KEYS['ArrowDown'] || KEYS['KeyS'];
+  ross.crouching = cr && ross.onGround;
+  ross.h = ross.crouching ? ross.crouchH : ross.normalH;
+
+  // horizontal
+  let speed = ross.crouching ? MOVE_SPEED * 0.55 : MOVE_SPEED;
+  if ((KEYS['ArrowLeft'] || KEYS['KeyA'])) {
+    ross.vx = -speed;
+    ross.facing = -1;
+  } else if ((KEYS['ArrowRight'] || KEYS['KeyD'])) {
+    ross.vx = speed;
+    ross.facing = 1;
+  } else {
+    ross.vx *= 0.7; // friction
+  }
+
+  // jump
+  const jumpKey = KEYS['ArrowUp'] || KEYS['KeyW'];
+  if (jumpKey && ross.onGround) {
+    ross.vy = -JUMP_FORCE;
+    ross.jumpHeld = 0;
+  }
+  if (jumpKey && ross.vy < 0 && ross.jumpHeld < JUMP_HOLD) {
+    ross.vy -= 600 * dt;
+    ross.jumpHeld += dt;
+  }
+
+  // smoke bomb
+  if (KEYS['Space'] && !KEYS['_spaceUsed']) {
+    KEYS['_spaceUsed'] = true;
+    useSmoke();
+  }
+  if (!KEYS['Space']) KEYS['_spaceUsed'] = false;
+
+  // gravity
+  ross.vy += GRAVITY * dt;
+  ross.x  += ross.vx * dt;
+  ross.y  += ross.vy * dt;
+
+  // clamp to world
+  ross.x = Math.max(20, Math.min(2400 - 20 - ross.w, ross.x));
+
+  platformCollide(ross);
+  // kill plane
+  if (ross.y > 620) { ross.y = 620; triggerDeath(); }
+}
+
+function updateGuards(dt) {
+  for (const g of guards) {
+    if (smokeActive) {
+      g.stateTimer = Math.max(g.stateTimer - dt, 0);
+      continue; // frozen
+    }
+    if (devroeTimer > 0) continue; // paused by devroe
+
+    // patrol movement
+    if (g.state === 'patrol' || g.state === 'suspicious') {
+      g.x += g.dir * g.speed * dt;
+      if (g.x < g.patrolLeft)  { g.x = g.patrolLeft;  g.dir =  1; }
+      if (g.x > g.patrolRight) { g.x = g.patrolRight; g.dir = -1; }
+    } else if (g.state === 'alert') {
+      // chase ross
+      const dx = (ross.x + ross.w/2) - (g.x + g.w/2);
+      const d  = Math.abs(dx);
+      if (d > 4) {
+        g.dir = dx > 0 ? 1 : -1;
+        g.x  += g.dir * g.speed * 1.5 * dt;
+      }
+      g.stateTimer -= dt;
+      if (g.stateTimer <= 0) {
+        g.state = 'patrol';
+        g.stateTimer = 0;
+      }
+    }
+
+    // guards don't use gravity — they stay on their assigned patrol floor
+    // vision detection
+    if (!ross.crouching) {
+      if (inVisionCone(g, ross)) {
+        ghostStatus = false;
+        if (g.state !== 'alert') {
+          g.state = 'alert';
+          g.stateTimer = 5;
+        }
+      }
+    }
+
+    // state timers
+    if (g.state === 'suspicious') {
+      g.stateTimer -= dt;
+      if (g.stateTimer <= 0) g.state = 'patrol';
+    }
+  }
+}
+
+function inVisionCone(guard, target) {
+  const gCX = guard.x + guard.w / 2;
+  const gCY = guard.y + guard.h / 2;
+  const tCX = target.x + target.w / 2;
+  const tCY = target.y + target.h / 2;
+  const dx  = tCX - gCX;
+  const dy  = tCY - gCY;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist > guard.visionRange) return false;
+  const angle = Math.atan2(dy, dx);
+  const guardAngle = guard.dir > 0 ? 0 : Math.PI;
+  let diff = angle - guardAngle;
+  while (diff >  Math.PI) diff -= Math.PI*2;
+  while (diff < -Math.PI) diff += Math.PI*2;
+  return Math.abs(diff) < guard.visionAngle;
+}
+
+function updateNoelia(dt) {
+  if (!noelia) return;
+
+  // Noelia floats smoothly to her target position (scripted NPC, no gravity)
+  let tx, ty;
+  if (noelia.hasLoot) {
+    // flee toward world edge after grabbing loot
+    tx = noelia.fleeX !== undefined ? noelia.fleeX : (noelia.x > 1200 ? 2360 : 40);
+    ty = noelia.y; // stay on same floor
+  } else {
+    tx = level.loot.x;
+    ty = level.loot.y - 24;
+  }
+
+  const dx = tx - noelia.x;
+  const dy = ty - noelia.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > 2) {
+    noelia.x += (dx / dist) * noelia.speed * dt;
+    noelia.y += (dy / dist) * noelia.speed * dt;
+  }
+
+  // Noelia grabs loot
+  if (!hasLoot && !lootItem.collected && !noelia.hasLoot) {
+    if (aabb(noelia, lootItem)) {
+      noelia.hasLoot = true;
+      lootItem.collected = true;
+      noelia.fleeX = noelia.x > 1200 ? 2360 : 40;
+    }
+  }
+  // Ross steals loot back from Noelia
+  if (noelia.hasLoot && aabb(ross, noelia)) {
+    noelia.hasLoot = false;
+    hasLoot = true;
+    exitPoint.active = true;
+    G.score += 100;
+  }
+}
+
+function updateSearchlights(dt) {
+  for (const sl of searchlights) {
+    sl.currentAngle += sl.speed * sl.dir * dt;
+    if (sl.currentAngle > sl.sweepMax) { sl.currentAngle = sl.sweepMax; sl.dir = -1; }
+    if (sl.currentAngle < sl.sweepMin) { sl.currentAngle = sl.sweepMin; sl.dir =  1; }
+
+    // check if ross is inside beam — all in world space, no camX
+    if (ross.crouching) continue;
+    const rCX  = ross.x + ross.w / 2;
+    const rCY  = ross.y + ross.h / 2;
+    const endX = sl.x + Math.cos(sl.currentAngle) * sl.range;
+    const endY = sl.y + Math.sin(sl.currentAngle) * sl.range;
+    const dist  = pointLineDistance(rCX, rCY, sl.x, sl.y, endX, endY);
+    const along = dotAlongLine(rCX, rCY, sl.x, sl.y, endX, endY);
+    if (dist < sl.width && along > 0 && along < 1) {
+      ghostStatus = false;
+      // trigger all guards to suspicious
+      for (const g of guards) {
+        if (g.state === 'patrol') { g.state = 'suspicious'; g.stateTimer = 3; }
+      }
+    }
+  }
+}
+
+function pointLineDistance(px, py, ax, ay, bx, by) {
+  const dx = bx-ax, dy = by-ay;
+  const len2 = dx*dx+dy*dy;
+  if (len2 === 0) return Math.hypot(px-ax, py-ay);
+  const t = ((px-ax)*dx+(py-ay)*dy)/len2;
+  const tc = Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(ax+tc*dx), py-(ay+tc*dy));
+}
+
+function dotAlongLine(px, py, ax, ay, bx, by) {
+  const dx=bx-ax, dy=by-ay, len2=dx*dx+dy*dy;
+  if (len2===0) return 0;
+  return ((px-ax)*dx+(py-ay)*dy)/len2;
+}
+
+function updateSmoke(dt) {
+  if (smokeActive) {
+    smokeTimer -= dt;
+    if (smokeTimer <= 0) {
+      smokeActive = false;
+      for (const g of guards) g.state = 'patrol';
+    }
+  }
+  if (devroeTimer > 0) {
+    devroeTimer -= dt;
+  }
+}
+
+function useSmoke() {
+  if (smokeBombs <= 0) return;
+  smokeBombs--;
+  smokeActive = true;
+  smokeTimer  = 3;
+}
+
+function updateDevroe() {
+  if (!level.devroe || G.devroeShown || G.devroeUsed) return;
+  // trigger when ross reaches floor 2 area (y < 300)
+  if (ross.y < 300) {
+    G.devroeShown = true;
+    showDevroeCard(true);
+    G.paused = true;
+  }
+}
+
+function checkLoot() {
+  // main loot
+  if (!hasLoot && !lootItem.collected && aabb(ross, lootItem)) {
+    hasLoot = true;
+    lootItem.collected = true;
+    exitPoint.active = true;
+    G.score += 200;
+  }
+  // bonus loot
+  for (const b of bonusItems) {
+    if (!b.collected && aabb(ross, {x:b.x, y:b.y, w:20, h:20})) {
+      b.collected = true;
+      G.score += b.pts;
+    }
+  }
+  // laser check
+  if (!ross.crouching) {
+    for (const l of lasers) {
+      if (aabb(ross, l)) {
+        ghostStatus = false;
+        for (const g of guards) { g.state = 'alert'; g.stateTimer = 5; }
+      }
+    }
+  }
+}
+
+function checkExit() {
+  if (!exitPoint.active) return;
+  if (aabb(ross, exitPoint)) {
+    completedLevel();
+  }
+}
+
+function checkGuardContact() {
+  for (const g of guards) {
+    if (g.state === 'alert' && aabb(ross, g)) {
+      triggerDeath();
+      return;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════
+
+function triggerDeath() {
+  if (!ross.alive) return;
+  ross.alive = false;
+  G.lives--;
+  G.running = false;
+  ghostStatus = false;
+
+  if (G.lives <= 0) {
+    showHUD(false);
+    document.getElementById('go-score').textContent = G.score;
+    showScreen('s-gameover');
+    return;
+  }
+
+  document.getElementById('death-lives').textContent =
+    '🕵️'.repeat(G.lives) + ' Lives remaining';
+  showScreen('s-death');
+  setTimeout(() => {
+    showScreen('');
+    respawn();
+  }, 2000);
+}
+
+function respawn() {
+  const rs = level.rossStart;
+  ross.x = rs.x; ross.y = rs.y;
+  ross.vx = 0; ross.vy = 0;
+  ross.alive = true;
+  for (const g of guards) { g.state = 'patrol'; g.stateTimer = 0; }
+  G.running = true;
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function completedLevel() {
+  G.running = false;
+  showHUD(false);
+
+  const elapsed = (performance.now() - levelStart) / 1000;
+  const timeBonus  = Math.max(0, Math.floor((120 - elapsed) * 5));
+  const ghost       = ghostStatus;
+  const ghostBonus  = ghost ? 500 : 0;
+  const lootBonus   = bonusItems.filter(b => b.collected).length * 50;
+  const base        = 300;
+  const lvlScore    = base + timeBonus + ghostBonus + lootBonus;
+  G.score += lvlScore;
+
+  document.getElementById('comp-phase').textContent = level.phase + ' Complete';
+  document.getElementById('comp-name').textContent  = level.name;
+  document.getElementById('comp-time').textContent  = Math.floor(elapsed) + 's';
+  document.getElementById('comp-loot').textContent  =
+    bonusItems.filter(b=>b.collected).length + ' / ' + bonusItems.length;
+  document.getElementById('comp-ghost').textContent = ghost ? '+500 ✓' : 'None';
+  document.getElementById('comp-pts').textContent   = '+' + lvlScore;
+  document.getElementById('comp-total').textContent = G.score;
+
+  const btn = document.getElementById('comp-btn');
+  if (G.levelIdx >= LEVEL_DEFS.length - 1) {
+    btn.textContent = 'View Final Rankings';
+    btn.onclick = showRankings;
+  } else {
+    btn.textContent = 'Next Heist';
+    btn.onclick = () => beginLevel(G.levelIdx + 1);
+  }
+  showScreen('s-complete');
+}
+
+function showDevroeCard(on) {
+  const card = document.getElementById('devroe-card');
+  card.classList.toggle('show', on);
+}
+
+document.getElementById('devroe-yes').addEventListener('click', acceptDevroe);
+document.getElementById('devroe-no').addEventListener('click',  refuseDevroe);
+
+function acceptDevroe() {
+  ghostStatus = false;
+  devroeTimer = 4;
+  G.devroeUsed = true;
+  G.paused = false;
+  showDevroeCard(false);
+}
+
+function refuseDevroe() {
+  G.devroeUsed = true;
+  G.paused = false;
+  showDevroeCard(false);
+}
+
+function showRankings() {
+  const noelia = 780, devroe = 650, taiyo = 590;
+  const board = [
+    {name:'Ross Quest', score:G.score, me:true},
+    {name:'Noelia Boschert', score:noelia},
+    {name:'Devroe Kenzie',   score:devroe},
+    {name:'Taiyō',           score:taiyo},
+  ].sort((a,b) => b.score - a.score);
+
+  const medals = ['🥇','🥈','🥉','4th'];
+  let html = '';
   board.forEach((r,i) => {
     html += `<div class="lb-row${r.me?' me':''}">
-      <div class="lb-rank${i===0?' gold':''}">${medals[i]}</div>
+      <div class="lb-rank${i===0?' g':''}">${medals[i]}</div>
       <div class="lb-name${r.me?' me':''}">${r.name}${r.me?' ★':''}</div>
       <div class="lb-score">${r.score}</div>
     </div>`;
   });
-  html += '</div>';
+  document.getElementById('lb-body').innerHTML = html;
 
-  if (won) {
-    html += `<div class="win-wrap">
-      <div class="win-title">THE WISH IS YOURS</div>
-      <div class="divider"></div>
-      <div class="epilogue">
-        You step forward and the room goes quiet. Even Noelia doesn't speak. The Count looks at you — really looks at you — and nods. "State your wish, Ms. Quest." You don't hesitate. You never hesitated. Three weeks later, your mother walks out of a facility in Geneva, blinking in the afternoon light. She asks how you found her. You tell her it was a bet. She laughs. She doesn't ask for details. She knows better.
-      </div>
-      <button class="btn" onclick="resetGame()">Play Again</button>
-    </div>`;
+  const pos = board.findIndex(r=>r.me)+1;
+  const verdict = document.getElementById('rank-verdict');
+  if (pos === 1) {
+    verdict.innerHTML = `<div class="win-title">THE WISH IS YOURS</div>
+      <div class="epilogue">You step forward and the room goes quiet. The Count nods. "State your wish, Ms. Quest." Three weeks later, your mother walks out of a facility in Geneva, blinking in the afternoon light. She asks how you found her. You tell her it was a bet.</div>`;
   } else {
-    html += `<div class="win-wrap">
-      <div class="lose-title">THE GAMBIT ISN'T OVER</div>
-      <div class="divider"></div>
-      <div class="epilogue lose">
-        Rank ${rossPos}. You came in rank ${rossPos}. The wish goes to someone else. You stand in the hall afterward, watching the winner walk away with the thing your mother's life depends on. You could be angry. You will be angry — later, when the adrenaline clears. Right now you're already thinking about next year. The Gambit comes back. You'll be ready.
-      </div>
-      <button class="btn" onclick="resetGame()">Play Again</button>
-    </div>`;
+    verdict.innerHTML = `<div class="lose-title">THE GAMBIT ISN'T OVER</div>
+      <div class="epilogue" style="border-left-color:var(--crimson-b)">Rank ${pos}. The wish goes to someone else. You're already thinking about next year. The Gambit comes back. You'll be ready.</div>`;
   }
-
-  document.getElementById('rank-content').innerHTML = html;
-  go('s-rankings');
+  showScreen('s-rankings');
 }
 
-function resetGame() {
-  document.getElementById('hud').style.display = 'none';
-  go('s-title');
+function fullReset() {
+  G.levelIdx = 0; G.score = 0; G.lives = 3;
+  G.running = false; G.paused = false;
+  G.devroeShown = false; G.devroeUsed = false;
+  showDevroeCard(false);
+  showScreen('s-title');
 }
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+
+const t0 = performance.now();
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  if (!level) return;
+
+  const t = (performance.now() - t0) / 1000;
+
+  // background
+  ctx.fillStyle = level.bgColor || '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  // uniform scale: world 2400x600 → canvas, camera offset in world units
+  ctx.scale(SCALE, SCALE);
+  ctx.translate(-camX, 0);
+
+  drawPlatforms();
+  drawLasers(t);
+  drawSearchlights(t);
+  drawBonusLoot(t);
+  drawLoot(t);
+  drawExit(t);
+  drawGuards(t);
+  drawNoelia(t);
+  drawRoss(t);
+  drawSmoke(t);
+  drawControlsHint(t);
+
+  ctx.restore();
+}
+
+function drawPlatforms() {
+  for (const p of level.platforms) {
+    // base fill
+    ctx.fillStyle = p.col;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    // gold top edge highlight
+    ctx.fillStyle = 'rgba(201,168,76,0.25)';
+    ctx.fillRect(p.x, p.y, p.w, 2);
+  }
+}
+
+function drawLoot(t) {
+  if (lootItem.collected && !noelia?.hasLoot) return;
+  const src = noelia?.hasLoot ? noelia : lootItem;
+  const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+  ctx.save();
+  ctx.shadowColor = '#c9a84c';
+  ctx.shadowBlur  = 10 + pulse * 14;
+  ctx.font = '22px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(src.label || lootItem.label, src.x + 12, src.y + 20);
+  ctx.restore();
+}
+
+function drawBonusLoot(t) {
+  for (const b of bonusItems) {
+    if (b.collected) continue;
+    const p2 = 0.5 + 0.5 * Math.sin(t * 3 + b.x);
+    ctx.save();
+    ctx.shadowColor = '#c9a84c';
+    ctx.shadowBlur  = 6 + p2 * 8;
+    ctx.font = '16px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.label, b.x + 10, b.y + 16);
+    ctx.restore();
+  }
+}
+
+function drawExit(t) {
+  if (!exitPoint.active) return;
+  const pulse = 0.4 + 0.6 * Math.abs(Math.sin(t * 3));
+  ctx.save();
+  ctx.shadowColor = '#4caf50';
+  ctx.shadowBlur  = 14 + pulse * 16;
+  ctx.fillStyle   = `rgba(76,175,80,${0.3 + pulse * 0.4})`;
+  ctx.fillRect(exitPoint.x, exitPoint.y - 10, exitPoint.w, exitPoint.h + 10);
+  ctx.fillStyle = '#4caf50';
+  ctx.font = '13px Cinzel, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('EXIT', exitPoint.x + exitPoint.w/2, exitPoint.y - 4);
+  ctx.restore();
+}
+
+function drawGuards(t) {
+  for (const g of guards) {
+    drawVisionCone(g);
+    // body
+    const col = g.state === 'alert' ? '#8b2a2a' :
+                g.state === 'suspicious' ? '#7a6a1a' : '#3a3a5a';
+    ctx.fillStyle = col;
+    ctx.fillRect(g.x, g.y, g.w, g.h);
+    // head
+    ctx.fillStyle = '#5a5a7a';
+    ctx.beginPath();
+    ctx.arc(g.x + g.w/2, g.y - 6, 8, 0, Math.PI*2);
+    ctx.fill();
+    // state dot
+    const dotCol = g.state === 'alert' ? '#ff4444' :
+                   g.state === 'suspicious' ? '#ffcc00' : '#44ff88';
+    ctx.fillStyle = dotCol;
+    ctx.beginPath();
+    ctx.arc(g.x + g.w/2, g.y - 18, 4, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawVisionCone(g) {
+  const cx = g.x + g.w/2;
+  const cy = g.y + g.h/2;
+  const angle = g.dir > 0 ? 0 : Math.PI;
+  const col = g.state === 'alert' ? 'rgba(192,57,43,0.3)' :
+              g.state === 'suspicious' ? 'rgba(201,168,76,0.2)' : 'rgba(100,100,120,0.12)';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, g.visionRange, angle - g.visionAngle, angle + g.visionAngle);
+  ctx.closePath();
+  ctx.fillStyle = col;
+  ctx.fill();
+}
+
+function drawSearchlights(t) {
+  for (const sl of searchlights) {
+    const sx = sl.x;
+    const sy = sl.y;
+    const ex = sx + Math.cos(sl.currentAngle) * sl.range;
+    const ey = sy + Math.sin(sl.currentAngle) * sl.range;
+    const perp = sl.currentAngle + Math.PI/2;
+    const hw = sl.width / 2;
+
+    ctx.save();
+    const grad = ctx.createLinearGradient(sx, sy, ex, ey);
+    grad.addColorStop(0, 'rgba(255,220,120,0.55)');
+    grad.addColorStop(1, 'rgba(255,220,120,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(sx + Math.cos(perp)*2, sy + Math.sin(perp)*2);
+    ctx.lineTo(ex + Math.cos(perp)*hw, ey + Math.sin(perp)*hw);
+    ctx.lineTo(ex - Math.cos(perp)*hw, ey - Math.sin(perp)*hw);
+    ctx.lineTo(sx - Math.cos(perp)*2, sy - Math.sin(perp)*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawLasers(t) {
+  for (const l of lasers) {
+    const pulse = 0.6 + 0.4 * Math.abs(Math.sin(t * 6));
+    ctx.save();
+    ctx.shadowColor = '#ff3333';
+    ctx.shadowBlur  = 8;
+    ctx.fillStyle   = `rgba(255,50,50,${pulse})`;
+    ctx.fillRect(l.x, l.y, l.w, l.h);
+    ctx.restore();
+  }
+}
+
+function drawNoelia(t) {
+  if (!noelia) return;
+  // body — dark purple
+  ctx.fillStyle = '#4a1060';
+  ctx.fillRect(noelia.x, noelia.y, noelia.w, noelia.h);
+  // head
+  ctx.fillStyle = '#6a2080';
+  ctx.beginPath();
+  ctx.arc(noelia.x + noelia.w/2, noelia.y - 6, 8, 0, Math.PI*2);
+  ctx.fill();
+  // label
+  ctx.font = '13px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(noelia.hasLoot ? '😏' : '👤', noelia.x + noelia.w/2, noelia.y - 20);
+}
+
+function drawSmoke(t) {
+  if (!smokeActive) return;
+  // billowing smoke cloud around Ross
+  const cx = ross.x + ross.w / 2;
+  const cy = ross.y + ross.h / 2;
+  const pulse = 0.5 + 0.5 * Math.sin(t * 8);
+  const radius = 60 + pulse * 20;
+  const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, radius);
+  grad.addColorStop(0, 'rgba(180,180,200,0.55)');
+  grad.addColorStop(0.5,'rgba(140,140,170,0.3)');
+  grad.addColorStop(1, 'rgba(100,100,140,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+  // timer bar
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const barW = 120, barH = 6;
+  const bx = W / 2 - barW / 2, by = 60;
+  ctx.fillStyle = 'rgba(10,10,15,0.7)';
+  ctx.fillRect(bx - 2, by - 2, barW + 4, barH + 4);
+  ctx.fillStyle = '#9ab0cc';
+  ctx.fillRect(bx, by, barW * (smokeTimer / 3), barH);
+  ctx.font = '10px Cinzel, serif';
+  ctx.fillStyle = '#9ab0cc';
+  ctx.textAlign = 'center';
+  ctx.fillText('SMOKE ACTIVE', W / 2, by - 6);
+  ctx.restore();
+}
+
+function drawRoss(t) {
+  const r = ross;
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(r.x + 2, r.y + r.h - 2, r.w - 4, 4);
+  // body silhouette — gold outline
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth = 1.5;
+  ctx.fillStyle = '#0d0d14';
+  const rh = r.h;
+  ctx.fillRect(r.x, r.y, r.w, rh);
+  ctx.strokeRect(r.x, r.y, r.w, rh);
+  // head
+  ctx.fillStyle = '#0d0d14';
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(r.x + r.w/2, r.y - 6, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+  // if crouching
+  if (r.crouching) {
+    ctx.fillStyle = 'rgba(201,168,76,0.18)';
+    ctx.beginPath();
+    ctx.ellipse(r.x + r.w/2, r.y + rh/2, 26, 12, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+  // loot indicator
+  if (hasLoot) {
+    const p = 0.5 + 0.5 * Math.sin(t * 5);
+    ctx.fillStyle = `rgba(201,168,76,${0.6+p*0.4})`;
+    ctx.font = '14px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(lootItem.label, r.x + r.w/2, r.y - 22);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CONTROLS HINT
+// ═══════════════════════════════════════════════
+
+let hintStart = 0;
+
+function drawControlsHint(t) {
+  const elapsed = t - hintStart;
+  if (elapsed > 6) return; // show for 6 seconds
+  const alpha = elapsed < 5 ? 1 : Math.max(0, 1 - (elapsed - 5)); // fade last second
+
+  // draw in screen space (undo world transform temporarily)
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // reset to screen space
+
+  const hints = [
+    'A / ← →  Move',
+    'W / ↑    Jump  (hold longer = higher)',
+    'S / ↓    Crouch  (hide from guards)',
+    'Space    Smoke Bomb',
+  ];
+  const boxW = 280, lineH = 22, pad = 14;
+  const boxH = hints.length * lineH + pad * 2;
+  const bx = 16, by = H - boxH - 16;
+
+  ctx.globalAlpha = alpha * 0.88;
+  ctx.fillStyle = 'rgba(10,10,15,0.9)';
+  ctx.fillRect(bx, by, boxW, boxH);
+  ctx.strokeStyle = 'rgba(201,168,76,0.5)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bx, by, boxW, boxH);
+
+  ctx.globalAlpha = alpha;
+  ctx.font = 'bold 11px Cinzel, serif';
+  ctx.fillStyle = '#c9a84c';
+  ctx.textAlign = 'left';
+  ctx.fillText('CONTROLS', bx + pad, by + pad + 10);
+
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = '#9a9585';
+  hints.forEach((h, i) => {
+    ctx.fillText(h, bx + pad, by + pad + 26 + i * lineH);
+  });
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════
+// IDLE CANVAS (title/menu screens)
+// ═══════════════════════════════════════════════
+
+let idleActive = true;
+
+function stopIdle() { idleActive = false; }
+
+(function idleDraw() {
+  if (!idleActive) return;
+  if (G.running) { requestAnimationFrame(idleDraw); return; }
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+  const t = performance.now() / 1000;
+  for (let i = 0; i < 22; i++) {
+    const x = (i * 137 + t * 10) % W;
+    const y = (i * 97  + t * 7)  % H;
+    ctx.fillStyle = `rgba(201,168,76,${0.03 + 0.03 * Math.sin(t + i)})`;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  requestAnimationFrame(idleDraw);
+})();
 </script>
 </body>
 </html>
