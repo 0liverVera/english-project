@@ -403,73 +403,79 @@ const LEVEL_DEFS = [
     smokeBombs: 3,
     bgColor: '#060810',
     platforms: [
-      // ground
-      {x:0,   y:520, w:2400, h:80, col:'#0a0c14'},
-      // floor 2
-      {x:0,   y:340, w:2400, h:20, col:'#0c0e1c'},
-      // floor 3
-      {x:0,   y:160, w:2400, h:20, col:'#0c0e1c'},
-      // floor 1 platforms
-      {x:200, y:440, w:160,  h:18, col:'#10122a'},
-      {x:500, y:400, w:180,  h:18, col:'#10122a'},
-      {x:850, y:450, w:160,  h:18, col:'#10122a'},
-      {x:1150,y:410, w:180,  h:18, col:'#10122a'},
-      {x:1500,y:440, w:160,  h:18, col:'#10122a'},
-      {x:1800,y:400, w:200,  h:18, col:'#10122a'},
-      // stairs left (all floors)
-      {x:60,  y:460, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:400, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:340, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:300, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:260, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:220, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:180, w:40,   h:18, col:'#14163a'},
-      {x:60,  y:160, w:40,   h:18, col:'#14163a'},
-      // floor 2 platforms
-      {x:200, y:260, w:200,  h:18, col:'#10122a'},
-      {x:520, y:280, w:180,  h:18, col:'#10122a'},
-      {x:850, y:260, w:200,  h:18, col:'#10122a'},
-      {x:1150,y:280, w:160,  h:18, col:'#10122a'},
-      {x:1460,y:260, w:200,  h:18, col:'#10122a'},
-      {x:1760,y:280, w:180,  h:18, col:'#10122a'},
-      {x:2050,y:260, w:200,  h:18, col:'#10122a'},
-      // floor 3 platforms
-      {x:200, y:100, w:200,  h:18, col:'#10122a'},
-      {x:520, y:120, w:160,  h:18, col:'#10122a'},
-      {x:820, y:100, w:200,  h:18, col:'#10122a'},
-      {x:1100,y:120, w:160,  h:18, col:'#10122a'},
-      {x:1380,y:100, w:180,  h:18, col:'#10122a'},
-      {x:1650,y:120, w:160,  h:18, col:'#10122a'},
-      {x:1900,y:100, w:300,  h:18, col:'#10122a'},
+      // ground floor
+      {x:0,    y:520, w:2400, h:80,  col:'#0a0c14'},
+      // ── FLOOR 2 SLAB ── split with two staircase gaps (same column positions as level 2)
+      {x:20,   y:340, w:360,  h:20,  col:'#0c0e1c'},   // left:  x:20-380
+      {x:700,  y:340, w:900,  h:20,  col:'#0c0e1c'},   // mid:   x:700-1600
+      {x:1920, y:340, w:460,  h:20,  col:'#0c0e1c'},   // right: x:1920-2380
+      // ── FLOOR 3 SLAB ── same gap columns
+      {x:20,   y:160, w:360,  h:20,  col:'#0c0e1c'},
+      {x:700,  y:160, w:900,  h:20,  col:'#0c0e1c'},
+      {x:1920, y:160, w:460,  h:20,  col:'#0c0e1c'},
+      // ── LEFT STAIRCASE — ground → floor 2 (gap x:380-700) ──
+      {x:385,  y:456, w:110,  h:18,  col:'#14163a'},
+      {x:400,  y:396, w:110,  h:18,  col:'#14163a'},
+      {x:415,  y:334, w:278,  h:18,  col:'#14163a'},   // landing → step down to floor-2 slab at x:700
+      // ── RIGHT STAIRCASE — ground → floor 2 (gap x:1600-1920) ──
+      {x:1800, y:456, w:110,  h:18,  col:'#14163a'},
+      {x:1780, y:396, w:110,  h:18,  col:'#14163a'},
+      {x:1607, y:334, w:307,  h:18,  col:'#14163a'},   // landing → step down to floor-2 slab at x:1600
+      // ── LEFT STAIRCASE — floor 2 → floor 3 (same gap x:380-700) ──
+      {x:385,  y:276, w:110,  h:18,  col:'#14163a'},
+      {x:400,  y:216, w:110,  h:18,  col:'#14163a'},
+      {x:415,  y:154, w:278,  h:18,  col:'#14163a'},   // landing → step down to floor-3 slab at x:700
+      // ── RIGHT STAIRCASE — floor 2 → floor 3 (gap x:1600-1920) ──
+      {x:1800, y:276, w:110,  h:18,  col:'#14163a'},
+      {x:1780, y:216, w:110,  h:18,  col:'#14163a'},
+      {x:1607, y:154, w:307,  h:18,  col:'#14163a'},   // landing → step down to floor-3 slab at x:1600
+      // ── FLOOR 1 STEPPING STONES ──
+      {x:200,  y:440, w:160,  h:18,  col:'#10122a'},
+      {x:900,  y:440, w:160,  h:18,  col:'#10122a'},
+      {x:1200, y:400, w:180,  h:18,  col:'#10122a'},
+      {x:1700, y:440, w:160,  h:18,  col:'#10122a'},
+      // ── FLOOR 2 UPPER PLATFORMS ──
+      {x:100,  y:258, w:200,  h:18,  col:'#10122a'},
+      {x:900,  y:258, w:200,  h:18,  col:'#10122a'},
+      {x:1500, y:258, w:160,  h:18,  col:'#10122a'},
+      {x:2050, y:258, w:200,  h:18,  col:'#10122a'},
+      // ── FLOOR 3 UPPER PLATFORMS ──
+      {x:100,  y:100, w:200,  h:18,  col:'#10122a'},
+      {x:850,  y:100, w:200,  h:18,  col:'#10122a'},
+      {x:1400, y:100, w:180,  h:18,  col:'#10122a'},
+      {x:1950, y:100, w:300,  h:18,  col:'#10122a'},
       // walls
-      {x:0,   y:0,   w:20,   h:520,col:'#060810'},
-      {x:2380,y:0,   w:20,   h:520,col:'#060810'},
+      {x:0,    y:0,   w:20,   h:520, col:'#060810'},
+      {x:2380, y:0,   w:20,   h:520, col:'#060810'},
     ],
     guards: [
-      {x:400, y:490, patrolLeft:100, patrolRight:700, speed:60},
-      {x:1200,y:490, patrolLeft:800, patrolRight:1600,speed:65},
-      {x:1900,y:490, patrolLeft:1600,patrolRight:2200,speed:60},
-      {x:500, y:310, patrolLeft:200, patrolRight:900, speed:70},
-      {x:1500,y:310, patrolLeft:1000,patrolRight:2000,speed:75},
-      {x:1200,y:130, patrolLeft:800, patrolRight:1800,speed:80},
+      // floor 1 (y:490, feet at ground y:520)
+      {x:400,  y:490, patrolLeft:100,  patrolRight:680,  speed:60},
+      {x:1600, y:490, patrolLeft:710,  patrolRight:1590, speed:65},
+      {x:2100, y:490, patrolLeft:1920, patrolRight:2350, speed:60},
+      // floor 2 (y:308, feet at slab top y:340)
+      {x:300,  y:308, patrolLeft:30,   patrolRight:680,  speed:70},
+      {x:1200, y:308, patrolLeft:710,  patrolRight:1590, speed:75},
+      // floor 3 (y:128, feet at slab top y:160)
+      {x:1200, y:128, patrolLeft:710,  patrolRight:1910, speed:80},
     ],
-    loot: {x:2100, y:115, label:'📒'},
+    loot: {x:2050, y:125, label:'📒'},
     bonusLoot:[
-      {x:600,  y:90,  label:'💍', pts:50},
-      {x:1400, y:90,  label:'💍', pts:50},
+      {x:120,  y:65,  label:'💍', pts:50},
+      {x:1430, y:65,  label:'💍', pts:50},
     ],
     exit: {x:2320, y:460},
     rossStart: {x:80, y:490},
-    noelia: {x:2300, y:130, patrolTarget:2100, speed:90, startDelay:4},
+    noelia: {x:2300, y:128, patrolTarget:2050, speed:90, startDelay:4},
     devroe: true,
     devroeFloor: 2,
     searchlights: [
-      {x:600, y:160, angle:0,        speed:0.8, range:170, width:35},
-      {x:1400,y:160, angle:Math.PI,  speed:0.9, range:170, width:35},
+      {x:300,  y:160, angle:0,        speed:0.8, range:170, width:35},
+      {x:1200, y:160, angle:Math.PI,  speed:0.9, range:170, width:35},
     ],
     lasers: [
-      {x:900, y:118, w:200, h:6, moving:false},
-      {x:1200,y:130, w:160, h:6, moving:false},
+      {x:850,  y:118, w:160, h:6, moving:false},
+      {x:1350, y:118, w:140, h:6, moving:false},
     ],
   }
 ];
@@ -1295,12 +1301,42 @@ function drawLoot(t) {
   if (lootItem.collected && !noelia?.hasLoot) return;
   const src = noelia?.hasLoot ? noelia : lootItem;
   const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+  const bounce = Math.sin(t * 4) * 4;
+
   ctx.save();
+  // pulsing aura ring
+  ctx.beginPath();
+  ctx.arc(src.x + 12, src.y + 12, 20 + pulse * 5, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(201,168,76,${0.35 + pulse * 0.3})`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // loot emoji
   ctx.shadowColor = '#c9a84c';
-  ctx.shadowBlur  = 10 + pulse * 14;
-  ctx.font = '22px serif';
+  ctx.shadowBlur  = 12 + pulse * 16;
+  ctx.font = '24px serif';
   ctx.textAlign = 'center';
-  ctx.fillText(src.label || lootItem.label, src.x + 12, src.y + 20);
+  ctx.fillText(src.label || lootItem.label, src.x + 12, src.y + 22 + bounce);
+
+  // "GRAB IT!" label
+  if (!hasLoot && !noelia?.hasLoot) {
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 10px Cinzel, serif';
+    ctx.fillStyle = '#c9a84c';
+    ctx.fillText('GRAB IT!', src.x + 12, src.y - 8 - bounce);
+
+    // bouncing down-arrow above loot
+    const ay = src.y - 28 - Math.abs(Math.sin(t * 4)) * 8;
+    ctx.fillStyle = '#c9a84c';
+    ctx.shadowColor = '#c9a84c';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(src.x + 12,      ay + 10);
+    ctx.lineTo(src.x + 12 - 9,  ay);
+    ctx.lineTo(src.x + 12 + 9,  ay);
+    ctx.closePath();
+    ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -1324,13 +1360,13 @@ function drawExit(t) {
   const pulse = 0.5 + 0.5 * Math.abs(Math.sin(t * 2.5));
 
   if (!ex.active) {
-    // Faint locked marker so player can see where to go eventually
+    // Locked — faint grey so player knows it exists
     ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = '#888';
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = '#555';
     ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
-    ctx.font = '11px Cinzel, serif';
-    ctx.fillStyle = '#888';
+    ctx.font = 'bold 10px Cinzel, serif';
+    ctx.fillStyle = '#777';
     ctx.textAlign = 'center';
     ctx.fillText('EXIT', cx, ex.y - 4);
     ctx.restore();
@@ -1338,44 +1374,62 @@ function drawExit(t) {
   }
 
   ctx.save();
-  // expanding ring beacon
-  for (let ring = 0; ring < 3; ring++) {
-    const rScale = ((t * 0.8 + ring * 0.33) % 1);
-    const rRadius = 30 + rScale * 50;
-    const rAlpha  = (1 - rScale) * 0.35;
+
+  // large radial glow on ground
+  const glow = ctx.createRadialGradient(cx, ex.y + ex.h/2, 4, cx, ex.y + ex.h/2, 90);
+  glow.addColorStop(0, `rgba(76,210,80,${0.28 + pulse * 0.18})`);
+  glow.addColorStop(1, 'rgba(76,210,80,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(cx - 90, ex.y - 60, 180, 110);
+
+  // expanding rings (4)
+  for (let ring = 0; ring < 4; ring++) {
+    const rp = ((t * 0.9 + ring * 0.25) % 1);
     ctx.beginPath();
-    ctx.arc(cx, ex.y + ex.h / 2, rRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(76,200,80,${rAlpha})`;
+    ctx.arc(cx, ex.y + ex.h / 2, 22 + rp * 80, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(76,210,80,${(1 - rp) * 0.45})`;
     ctx.lineWidth = 2;
     ctx.stroke();
   }
+
   // glowing pad
   ctx.shadowColor = '#4caf50';
-  ctx.shadowBlur  = 20 + pulse * 24;
-  ctx.fillStyle   = `rgba(76,175,80,${0.25 + pulse * 0.35})`;
+  ctx.shadowBlur  = 22 + pulse * 32;
+  ctx.fillStyle   = `rgba(76,175,80,${0.3 + pulse * 0.45})`;
   ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
 
-  // solid top stripe
+  // bright top stripe
   ctx.shadowBlur = 0;
-  ctx.fillStyle = `rgba(76,210,80,${0.7 + pulse * 0.3})`;
-  ctx.fillRect(ex.x, ex.y, ex.w, 3);
+  ctx.fillStyle = `rgba(100,255,100,${0.85 + pulse * 0.15})`;
+  ctx.fillRect(ex.x, ex.y, ex.w, 4);
 
-  // "EXIT" label above
+  // "RUN HERE!" text
   ctx.shadowColor = '#4caf50';
-  ctx.shadowBlur  = 10;
-  ctx.font = 'bold 13px Cinzel, serif';
+  ctx.shadowBlur  = 14;
+  ctx.font = 'bold 14px Cinzel, serif';
   ctx.fillStyle = '#5eff6a';
   ctx.textAlign = 'center';
-  ctx.fillText('EXIT', cx, ex.y - 8);
+  ctx.fillText('RUN HERE!', cx, ex.y - 42);
 
-  // down-arrow chevron
-  ctx.fillStyle = `rgba(94,255,106,${0.6 + pulse * 0.4})`;
-  ctx.beginPath();
-  ctx.moveTo(cx,      ex.y - 18);
-  ctx.lineTo(cx - 7,  ex.y - 26);
-  ctx.lineTo(cx + 7,  ex.y - 26);
-  ctx.closePath();
-  ctx.fill();
+  // EXIT label smaller
+  ctx.font = 'bold 11px Cinzel, serif';
+  ctx.fillStyle = '#5eff6a';
+  ctx.fillText('EXIT', cx, ex.y - 28);
+
+  // three stacked bouncing down-arrows
+  const arrowBounce = Math.abs(Math.sin(t * 3.5)) * 7;
+  ctx.fillStyle = `rgba(100,255,100,${0.85 + pulse * 0.15})`;
+  ctx.shadowColor = '#4caf50';
+  ctx.shadowBlur = 10;
+  for (let i = 0; i < 3; i++) {
+    const ay = ex.y - 22 + i * 8 - arrowBounce;
+    ctx.beginPath();
+    ctx.moveTo(cx,      ay + 7);
+    ctx.lineTo(cx - 8,  ay);
+    ctx.lineTo(cx + 8,  ay);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   ctx.restore();
 }
@@ -1383,22 +1437,87 @@ function drawExit(t) {
 function drawGuards(t) {
   for (const g of guards) {
     drawVisionCone(g);
-    // body
-    const col = g.state === 'alert' ? '#8b2a2a' :
-                g.state === 'suspicious' ? '#7a6a1a' : '#3a3a5a';
-    ctx.fillStyle = col;
-    ctx.fillRect(g.x, g.y, g.w, g.h);
-    // head
-    ctx.fillStyle = '#5a5a7a';
+
+    const cx      = g.x + g.w / 2;
+    const facing  = g.dir || 1;
+    const isAlert = g.state === 'alert';
+    const isSusp  = g.state === 'suspicious';
+
+    ctx.save();
+
+    // state glow
+    if (isAlert)     { ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 16; }
+    else if (isSusp) { ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 10; }
+
+    // LEGS
+    ctx.fillStyle = '#12122a';
+    ctx.fillRect(cx - 7, g.y + 22, 5, 10);
+    ctx.fillRect(cx + 2,  g.y + 22, 5, 10);
+
+    // BODY (uniform)
+    const bodyCol = isAlert ? '#5a0a0a' : isSusp ? '#3a3a0a' : '#10184a';
+    ctx.fillStyle = bodyCol;
+    ctx.fillRect(cx - 8, g.y + 10, 16, 14);
+
+    // BADGE (gold square)
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#c9a84c';
+    ctx.fillRect(cx + (facing > 0 ? 2 : -5), g.y + 14, 4, 4);
+
+    // ARM (extended in facing direction)
+    ctx.fillStyle = bodyCol;
+    if (facing > 0) ctx.fillRect(cx + 8,  g.y + 12, 8, 4);
+    else            ctx.fillRect(cx - 16, g.y + 12, 8, 4);
+
+    // HEAD (skin)
+    ctx.fillStyle = '#d4956a';
     ctx.beginPath();
-    ctx.arc(g.x + g.w/2, g.y - 6, 8, 0, Math.PI*2);
+    ctx.arc(cx, g.y + 5, 7, 0, Math.PI * 2);
     ctx.fill();
-    // state dot
-    const dotCol = g.state === 'alert' ? '#ff4444' :
-                   g.state === 'suspicious' ? '#ffcc00' : '#44ff88';
+
+    // EYES (facing direction)
+    const eyeX = facing > 0 ? cx + 1 : cx - 5;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(eyeX, g.y + 3, 4, 3);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(eyeX + (facing > 0 ? 1 : 0), g.y + 4, 2, 2);
+
+    // HAT (security cap — brim + crown + badge)
+    const hatCol = isAlert ? '#7a0a0a' : '#0a1235';
+    ctx.fillStyle = hatCol;
+    ctx.fillRect(cx - 10, g.y - 2,  20, 4);   // brim
+    ctx.fillRect(cx - 8,  g.y - 10, 16, 10);  // crown
+    ctx.fillStyle = '#c9a84c';
+    ctx.fillRect(cx - 2,  g.y - 8,  4,  3);   // hat badge
+
+    ctx.restore();
+
+    // STATE BUBBLE (! alert  /  ? suspicious)
+    if (g.state !== 'patrol') {
+      const sym    = isAlert ? '!' : '?';
+      const bubCol = isAlert ? '#ff4444' : '#ffcc00';
+      ctx.save();
+      ctx.fillStyle = 'rgba(10,10,15,0.88)';
+      ctx.strokeStyle = bubCol;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(cx - 10, g.y - 30, 20, 18, 5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = bubCol;
+      ctx.shadowColor = bubCol;
+      ctx.shadowBlur = 6;
+      ctx.fillText(sym, cx, g.y - 16);
+      ctx.restore();
+    }
+
+    // tiny status dot above hat
+    const dotCol = isAlert ? '#ff4444' : isSusp ? '#ffcc00' : '#44ff88';
     ctx.fillStyle = dotCol;
     ctx.beginPath();
-    ctx.arc(g.x + g.w/2, g.y - 18, 4, 0, Math.PI*2);
+    ctx.arc(cx, g.y - 14, 3, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -1456,18 +1575,60 @@ function drawLasers(t) {
 
 function drawNoelia(t) {
   if (!noelia) return;
-  // body — dark purple
-  ctx.fillStyle = '#4a1060';
-  ctx.fillRect(noelia.x, noelia.y, noelia.w, noelia.h);
-  // head
-  ctx.fillStyle = '#6a2080';
+  const cx = noelia.x + noelia.w / 2;
+
+  ctx.save();
+  ctx.shadowColor = '#9b30d0';
+  ctx.shadowBlur = 10;
+
+  // LEGS
+  ctx.fillStyle = '#1a0828';
+  ctx.fillRect(cx - 7, noelia.y + 22, 5, 10);
+  ctx.fillRect(cx + 2,  noelia.y + 22, 5, 10);
+
+  // BODY
+  ctx.fillStyle = '#2a0848';
+  ctx.fillRect(cx - 8, noelia.y + 10, 16, 14);
+
+  // ARM
+  ctx.fillStyle = '#2a0848';
+  ctx.fillRect(cx + 8, noelia.y + 12, 7, 4);
+
+  // HEAD (skin)
+  ctx.fillStyle = '#d4956a';
   ctx.beginPath();
-  ctx.arc(noelia.x + noelia.w/2, noelia.y - 6, 8, 0, Math.PI*2);
+  ctx.arc(cx, noelia.y + 5, 7, 0, Math.PI * 2);
   ctx.fill();
-  // label
-  ctx.font = '13px serif';
+
+  // HAIR / headband (purple)
+  ctx.fillStyle = '#6a20a0';
+  ctx.fillRect(cx - 8, noelia.y - 2,  16, 5);   // headband
+  ctx.fillRect(cx - 5, noelia.y - 10, 10, 10);  // hair top
+
+  // EYES (purple, distinctive)
+  ctx.fillStyle = '#c060ff';
+  ctx.fillRect(cx - 5, noelia.y + 3, 3, 3);
+  ctx.fillRect(cx + 1,  noelia.y + 3, 3, 3);
+
+  // purple outline
+  ctx.strokeStyle = '#9b30d0';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(cx - 8, noelia.y + 10, 16, 14);
+  ctx.beginPath();
+  ctx.arc(cx, noelia.y + 5, 7, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // floating name tag
+  ctx.save();
+  ctx.font = 'bold 9px Cinzel, serif';
   ctx.textAlign = 'center';
-  ctx.fillText(noelia.hasLoot ? '😏' : '👤', noelia.x + noelia.w/2, noelia.y - 20);
+  ctx.fillStyle = '#c060ff';
+  ctx.shadowColor = '#9b30d0';
+  ctx.shadowBlur = 4;
+  ctx.fillText(noelia.hasLoot ? '😏 NOELIA' : '⚠ NOELIA', cx, noelia.y - 14);
+  ctx.restore();
 }
 
 // ═══════════════════════════════════════════════
@@ -1642,11 +1803,11 @@ function drawArrowIndicators(t) {
   if (!hasLoot && !lootItem.collected) {
     // Point to loot
     const lx = lootItem.x + 12, ly = lootItem.y + 12;
-    drawArrow(lx, ly, '#c9a84c', level.loot.label + ' LOOT', pulse, t);
+    drawArrow(lx, ly, '#c9a84c', '⭐ STEAL THIS!', pulse, t);
   } else if (exitPoint.active) {
     // Point to exit
     const ex = exitPoint.x + exitPoint.w/2, ey = exitPoint.y + exitPoint.h/2;
-    drawArrow(ex, ey, '#4cff6a', 'EXIT', pulse, t);
+    drawArrow(ex, ey, '#4cff6a', '🚪 ESCAPE!', pulse, t);
   }
   // Noelia warning if she has loot
   if (noelia && noelia.hasLoot) {
@@ -1965,38 +2126,66 @@ function drawSmoke(t) {
 
 function drawRoss(t) {
   const r = ross;
-  // shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fillRect(r.x + 2, r.y + r.h - 2, r.w - 4, 4);
-  // body silhouette — gold outline
-  ctx.strokeStyle = '#c9a84c';
-  ctx.lineWidth = 1.5;
-  ctx.fillStyle = '#0d0d14';
+  const facing = r.facing || 1;
+  const cx = r.x + r.w / 2;
   const rh = r.h;
-  ctx.fillRect(r.x, r.y, r.w, rh);
-  ctx.strokeRect(r.x, r.y, r.w, rh);
-  // head
-  ctx.fillStyle = '#0d0d14';
+
+  // ground shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(r.x + 2, r.y + rh, r.w - 4, 4);
+
+  ctx.save();
+  ctx.shadowColor = '#c9a84c';
+  ctx.shadowBlur = 6;
+
+  // LEGS
+  ctx.fillStyle = '#18181e';
+  ctx.fillRect(cx - 7, r.y + rh * 0.6, 5, rh * 0.4);
+  ctx.fillRect(cx + 2,  r.y + rh * 0.6, 5, rh * 0.4);
+
+  // BODY (dark thief outfit)
+  ctx.fillStyle = '#0d0d18';
+  ctx.fillRect(cx - 8, r.y + rh * 0.28, 16, rh * 0.35);
+
+  // gold belt
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(cx - 8, r.y + rh * 0.55, 16, 2);
+
+  // ARM (toward facing direction)
+  ctx.fillStyle = '#0d0d18';
+  if (facing > 0) ctx.fillRect(cx + 8,  r.y + rh * 0.3, 7, 4);
+  else            ctx.fillRect(cx - 15, r.y + rh * 0.3, 7, 4);
+
+  // HEAD (black balaclava)
+  ctx.fillStyle = '#0d0d18';
+  ctx.beginPath();
+  ctx.arc(cx, r.y + rh * 0.16, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // EYES (gold slits — thief look)
+  const eyeX = facing > 0 ? cx + 1 : cx - 5;
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(eyeX, r.y + rh * 0.12, 4, 3);
+
+  // gold outline (signature)
   ctx.strokeStyle = '#c9a84c';
   ctx.lineWidth = 1.5;
+  ctx.strokeRect(cx - 8, r.y + rh * 0.28, 16, rh * 0.35);
   ctx.beginPath();
-  ctx.arc(r.x + r.w/2, r.y - 6, 8, 0, Math.PI*2);
-  ctx.fill();
+  ctx.arc(cx, r.y + rh * 0.16, 8, 0, Math.PI * 2);
   ctx.stroke();
-  // if crouching
-  if (r.crouching) {
-    ctx.fillStyle = 'rgba(201,168,76,0.18)';
-    ctx.beginPath();
-    ctx.ellipse(r.x + r.w/2, r.y + rh/2, 26, 12, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-  // loot indicator
+
+  ctx.restore();
+
+  // loot carried
   if (hasLoot) {
     const p = 0.5 + 0.5 * Math.sin(t * 5);
-    ctx.fillStyle = `rgba(201,168,76,${0.6+p*0.4})`;
-    ctx.font = '14px serif';
+    ctx.font = '16px serif';
     ctx.textAlign = 'center';
-    ctx.fillText(lootItem.label, r.x + r.w/2, r.y - 22);
+    ctx.fillStyle = `rgba(201,168,76,${0.7 + p * 0.3})`;
+    ctx.shadowColor = '#c9a84c';
+    ctx.shadowBlur = 8;
+    ctx.fillText(lootItem.label, cx, r.y - 8);
   }
 }
 
