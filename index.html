@@ -119,6 +119,100 @@ p{line-height:1.7;color:var(--text)}
   .rival-grid{grid-template-columns:1fr}
   #devroe-inner{flex-direction:column;text-align:center}
 }
+
+/* ── LANDING ── */
+#s-landing{background:var(--bg);overflow:hidden}
+.land-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:600px;width:100%;padding:0 20px}
+.land-eyebrow{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:16px}
+.land-title{font-family:'Cinzel',serif;font-size:clamp(3rem,10vw,6rem);font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 60px rgba(201,168,76,.5);line-height:1;margin:0}
+.land-sub{color:var(--text-dim);font-size:.9rem;font-style:italic;letter-spacing:.04em;margin-bottom:40px}
+.land-choices{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;width:100%}
+.land-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:2px solid var(--border);padding:28px 32px;cursor:pointer;transition:all .25s;min-width:200px;flex:1;max-width:260px;position:relative;overflow:hidden}
+.land-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s}
+.land-btn:hover{transform:translateY(-3px)}
+.land-btn-game{border-color:var(--gold-dim)}
+.land-btn-game::before{background:linear-gradient(135deg,rgba(201,168,76,.08),transparent)}
+.land-btn-game:hover{border-color:var(--gold);box-shadow:0 0 24px rgba(201,168,76,.25)}
+.land-btn-game:hover::before{opacity:1}
+.land-btn-ref{border-color:var(--border)}
+.land-btn-ref::before{background:linear-gradient(135deg,rgba(100,120,200,.08),transparent)}
+.land-btn-ref:hover{border-color:#6688cc;box-shadow:0 0 24px rgba(100,120,200,.2)}
+.land-btn-ref:hover::before{opacity:1}
+.land-btn-icon{font-size:1.8rem;line-height:1;margin-bottom:4px}
+.land-btn-label{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase}
+.land-btn-ref .land-btn-label{color:#8899dd}
+.land-btn-desc{font-size:.72rem;color:var(--text-dim);letter-spacing:.03em}
+@media(max-width:480px){.land-choices{flex-direction:column;align-items:center}.land-btn{max-width:100%;width:100%}}
+
+/* ── REFLECTION ── */
+.ref-screen{background:var(--bg);overflow:hidden;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:0}
+.ref-back-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);flex-shrink:0;gap:12px}
+.ref-back-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.14em;color:var(--gold-dim);text-transform:uppercase;text-align:center;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ref-body{overflow-y:auto;flex:1;padding:0 0 60px;scroll-behavior:smooth}
+.ref-body::-webkit-scrollbar{width:4px}
+.ref-body::-webkit-scrollbar-track{background:transparent}
+.ref-body::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px}
+
+/* hero banner */
+.ref-hero{text-align:center;padding:52px 24px 40px;border-bottom:1px solid var(--border);background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.07) 0%,transparent 70%)}
+.ref-hero-eyebrow{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:12px}
+.ref-hero-title{font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,3.6rem);font-weight:900;color:var(--gold);letter-spacing:.08em;text-shadow:0 0 40px rgba(201,168,76,.4);margin-bottom:10px}
+.ref-hero-sub{color:var(--text-dim);font-size:.92rem;font-style:italic;max-width:520px;margin:0 auto;line-height:1.7}
+
+/* sections */
+.ref-section{display:flex;gap:28px;padding:40px max(24px,calc((100% - 900px)/2));border-bottom:1px solid var(--border)}
+.ref-section:last-of-type{border-bottom:none}
+.ref-sec-num{font-family:'Cinzel',serif;font-size:2.4rem;font-weight:900;color:var(--gold-dim);opacity:.25;flex-shrink:0;line-height:1;padding-top:4px;min-width:44px}
+.ref-sec-content{flex:1;min-width:0}
+.ref-h2{font-family:'Cinzel',serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--gold);letter-spacing:.06em;margin-bottom:16px;text-align:left}
+.ref-sec-content p{font-size:.9rem;line-height:1.82;color:var(--text-dim);margin-bottom:14px}
+.ref-sec-content p strong{color:var(--text)}
+.ref-sec-content p:last-child{margin-bottom:0}
+
+/* quote blocks */
+.ref-quote-block{background:var(--card);border-left:3px solid var(--gold);padding:20px 24px;margin:18px 0;position:relative}
+.ref-quote-block::before{content:'"';font-family:'Cinzel',serif;font-size:3.5rem;color:var(--gold-dim);position:absolute;top:-6px;left:10px;opacity:.2;line-height:1}
+.ref-quote-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.25em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:12px}
+.ref-quote-block p{font-size:.88rem;color:var(--text-dim);line-height:1.82;margin-bottom:10px}
+.ref-quote-block p:last-child{margin-bottom:0}
+
+/* tools */
+.ref-tools{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.ref-tool{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold-dim);padding:14px 18px}
+.ref-tool-name{font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);margin-bottom:6px;letter-spacing:.04em}
+.ref-tool-desc{font-size:.82rem;color:var(--text-dim);line-height:1.72}
+.ref-link{color:#7799dd;font-style:normal;word-break:break-all}
+
+/* levels grid */
+.ref-levels{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.ref-level{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);padding:11px 16px}
+.ref-level-final{border-color:var(--gold-dim);box-shadow:0 0 12px rgba(201,168,76,.12)}
+.ref-lvl-num{font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold-dim);letter-spacing:.12em;min-width:28px}
+.ref-lvl-name{font-family:'Cinzel',serif;font-size:.88rem;color:var(--text);flex:1}
+.ref-lvl-loc{font-size:.75rem;color:var(--text-dim)}
+
+/* time chart */
+.ref-total-time{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);margin-bottom:20px}
+.ref-time-bars{display:flex;flex-direction:column;gap:6px}
+.ref-time-row{display:flex;align-items:center;gap:12px}
+.ref-time-label{font-size:.8rem;color:var(--text);min-width:155px;flex-shrink:0}
+.ref-time-bar-wrap{flex:1;height:10px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.ref-time-bar{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:2px;transition:width .6s ease}
+.ref-time-bar-b{background:linear-gradient(90deg,#4a6fa5,#6a9fd8)}
+.ref-time-bar-c{background:linear-gradient(90deg,#4a7a5a,#6aaa7a)}
+.ref-time-val{font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);min-width:52px;text-align:right}
+.ref-time-desc{font-size:.78rem;color:var(--text-dim);line-height:1.65;padding-left:167px;margin-bottom:14px}
+
+/* footer */
+.ref-footer{text-align:center;padding:40px 24px;border-top:1px solid var(--border);background:radial-gradient(ellipse at 50% 100%,rgba(201,168,76,.05) 0%,transparent 70%)}
+
+@media(max-width:600px){
+  .ref-section{flex-direction:column;gap:8px;padding:30px 20px}
+  .ref-sec-num{font-size:1.6rem;min-width:unset}
+  .ref-time-label{min-width:120px}
+  .ref-time-desc{padding-left:0}
+  .ref-back-bar .btn{font-size:.6rem;padding:6px 12px}
+}
 </style>
 </head>
 <body>
@@ -161,8 +255,161 @@ p{line-height:1.7;color:var(--text)}
 <!-- UI SCREENS -->
 <div id="ui">
 
+  <!-- LANDING — choose game or reflection -->
+  <div id="s-landing" class="screen active">
+    <div class="land-wrap">
+      <div class="land-eyebrow">An English Project by Oliver</div>
+      <h1 class="land-title">THIEVES'<br>GAMBIT</h1>
+      <div class="ornament">— ✦ —</div>
+      <p class="land-sub">Inspired by the novel by Kayvion Lewis</p>
+      <div class="land-choices">
+        <button class="land-btn land-btn-game" onclick="showScreen('s-title')">
+          <span class="land-btn-icon">▶</span>
+          <span class="land-btn-label">Play the Game</span>
+          <span class="land-btn-desc">Jump straight into the heist</span>
+        </button>
+        <button class="land-btn land-btn-ref" onclick="showScreen('s-reflection')">
+          <span class="land-btn-icon">📖</span>
+          <span class="land-btn-label">Oliver's Reflection</span>
+          <span class="land-btn-desc">Read the project write-up</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div id="s-reflection" class="screen ref-screen">
+    <div class="ref-back-bar">
+      <button class="btn" onclick="showScreen('s-landing')" style="font-size:.7rem;padding:8px 20px">← Back</button>
+      <span class="ref-back-title">Oliver's Reflection — Thieves' Gambit</span>
+      <button class="btn" onclick="showScreen('s-title')" style="font-size:.7rem;padding:8px 20px">▶ Play Game</button>
+    </div>
+    <div class="ref-body">
+
+      <div class="ref-hero">
+        <div class="ref-hero-eyebrow">English Project Reflection</div>
+        <div class="ref-hero-title">Thieves' Gambit</div>
+        <div class="ref-hero-sub">A Browser-Based Stealth Game Inspired by the Novel by Kayvion Lewis</div>
+      </div>
+
+      <!-- S1 -->
+      <div class="ref-section">
+        <div class="ref-sec-num">01</div>
+        <div class="ref-sec-content">
+          <h2 class="ref-h2">My Original Project Prompt</h2>
+          <p>For my English project I wanted to move beyond a standard essay or poster and instead create something interactive that genuinely reflected the world of the novel. Below is the brief I wrote for myself before I started building.</p>
+          <div class="ref-quote-block">
+            <div class="ref-quote-label">— Project Brief —</div>
+            <p>I want to build a browser-based platformer game that brings the themes of Kayvion Lewis's novel to life through interactive play. The game will follow protagonist Ross Quest as she navigates a series of high-stakes stealth heists across four international locations: a private vault outside Nairobi, a prestigious museum in Tokyo, a luxury penthouse in Monaco, and — in the final level — the Royal Vault in London.</p>
+            <p>The player will control Ross from a side-scrolling perspective, jumping across platforms, crouching under searchlights, and using limited smoke bombs to evade guards who patrol each level with vision cones. Each level will contain a primary loot item tied to the novel (a diamond, a scroll, a ledger, a crown) that the player must steal before reaching the exit.</p>
+            <p>Key characters from the book — rival thief Noelia Boschert and the antagonist Devroe — will appear in the game. Noelia will race the player to the loot, and a Devroe encounter will pause the game for a pivotal decision. The final level introduces a "Nemesis" guard representing the book's climactic threat.</p>
+            <p>The game must run in any modern web browser with no downloads or installations required — a single HTML file. Difficulty must increase across levels: more guards, lasers, searchlights, and faster enemies. The atmosphere should feel like the novel — dark, tense, and cinematic — with location-specific backgrounds for each heist.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="ref-section">
+        <div class="ref-sec-num">02</div>
+        <div class="ref-sec-content">
+          <h2 class="ref-h2">Tools I Used</h2>
+          <div class="ref-tools">
+            <div class="ref-tool">
+              <div class="ref-tool-name">🤖 Claude (Anthropic AI)</div>
+              <div class="ref-tool-desc">Primary coding assistant. Claude wrote all of the HTML, CSS, and JavaScript — from the physics engine and guard AI to the canvas rendering and level layouts. I described what I wanted in plain English and Claude translated those ideas into working code, fixed bugs when things broke, and suggested improvements. Every line of the game was generated or revised through conversation with Claude.</div>
+            </div>
+            <div class="ref-tool">
+              <div class="ref-tool-name">🐙 GitHub</div>
+              <div class="ref-tool-desc">Version control and public hosting. I created the repository "english-project" under my username (0liverVera) and used git commits to save each stage of the project. GitHub Pages was enabled so the game is publicly playable at <span class="ref-link">https://0liververa.github.io/english-project/</span> with no server setup required.</div>
+            </div>
+            <div class="ref-tool">
+              <div class="ref-tool-name">💻 Visual Studio Code</div>
+              <div class="ref-tool-desc">Code editor. Used to open, review, and occasionally manually edit the single index.html file, and to run git commands from the built-in terminal.</div>
+            </div>
+            <div class="ref-tool">
+              <div class="ref-tool-name">🔍 Google Chrome DevTools</div>
+              <div class="ref-tool-desc">Browser-based debugging. Whenever the game behaved unexpectedly I opened the console to see JavaScript errors and understand what was going wrong before describing the problem to Claude.</div>
+            </div>
+            <div class="ref-tool">
+              <div class="ref-tool-name">🔤 Google Fonts</div>
+              <div class="ref-tool-desc">Typography. Two typefaces — Cinzel (for headings and in-game text) and Inter (for UI labels) — were loaded from Google Fonts to give the game a polished, cinematic look matching the tone of the novel.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="ref-section">
+        <div class="ref-sec-num">03</div>
+        <div class="ref-sec-content">
+          <h2 class="ref-h2">What the Project Is About</h2>
+          <p>Thieves' Gambit is a browser-based stealth platformer game inspired by the YA novel of the same name by Kayvion Lewis. The game casts the player as Ross Quest — a teenage master thief competing in a secret underground heist competition — and challenges them to steal a precious artefact from each of four increasingly secure locations before escaping through the exit. The entire game runs in a web browser as a single HTML file with no installation required.</p>
+          <p>The four levels track the escalating tension of the novel. <strong>Level 1, The Kenyan Vault</strong> introduces the basic mechanics: moving, jumping, crouching, and avoiding guards. <strong>Level 2, The Tokyo Museum</strong> adds a second floor, searchlights, and rival character Noelia Boschert who races the player to the loot. <strong>Level 3, The Monaco Penthouse</strong> introduces three floors, laser tripwires, and a mid-level encounter with antagonist Devroe. <strong>Level 4, The Royal Vault</strong> in London is the climax: eight lasers, three searchlights, and a specially marked "Nemesis" guard representing the novel's ultimate threat — all guarding the Crown Jewel.</p>
+          <p>Thematically the game mirrors the novel's core ideas: cunning over brute force, the tension between rivalry and alliance, and the cost of ambition. Players who avoid detection earn a "Ghost Run" bonus, rewarding patience over recklessness — just as the novel rewards characters who think before they act. The visual atmosphere — dark colour palettes, gold accents, and location-specific skylines — is designed to immerse the player in the world of the book.</p>
+          <div class="ref-levels">
+            <div class="ref-level"><span class="ref-lvl-num">L1</span><span class="ref-lvl-name">The Kenyan Vault</span><span class="ref-lvl-loc">Nairobi, Kenya · 💎 Diamond</span></div>
+            <div class="ref-level"><span class="ref-lvl-num">L2</span><span class="ref-lvl-name">The Tokyo Museum</span><span class="ref-lvl-loc">Tokyo, Japan · 📜 Scroll</span></div>
+            <div class="ref-level"><span class="ref-lvl-num">L3</span><span class="ref-lvl-name">The Monaco Penthouse</span><span class="ref-lvl-loc">Monaco Harbor · 📒 Ledger</span></div>
+            <div class="ref-level ref-level-final"><span class="ref-lvl-num">L4</span><span class="ref-lvl-name">The Royal Vault</span><span class="ref-lvl-loc">London, England · 👑 Crown</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="ref-section">
+        <div class="ref-sec-num">04</div>
+        <div class="ref-sec-content">
+          <h2 class="ref-h2">Time Spent</h2>
+          <p class="ref-total-time">~5 hours total</p>
+          <div class="ref-time-bars">
+            <div class="ref-time-row">
+              <div class="ref-time-label">Setup &amp; Configuration</div>
+              <div class="ref-time-bar-wrap"><div class="ref-time-bar" style="width:50%"></div></div>
+              <div class="ref-time-val">~2.5 hrs</div>
+            </div>
+            <div class="ref-time-desc">Creating the GitHub repository, learning how git works, enabling GitHub Pages, and getting everything configured before a single line of game code was written. This phase took far longer than expected.</div>
+            <div class="ref-time-row">
+              <div class="ref-time-label">Building with Claude</div>
+              <div class="ref-time-bar-wrap"><div class="ref-time-bar ref-time-bar-b" style="width:30%"></div></div>
+              <div class="ref-time-val">~1.5 hrs</div>
+            </div>
+            <div class="ref-time-desc">Iterating on the game — physics, level layouts, guard AI, characters, UI, and the four atmospheric backgrounds.</div>
+            <div class="ref-time-row">
+              <div class="ref-time-label">Testing &amp; Refining</div>
+              <div class="ref-time-bar-wrap"><div class="ref-time-bar ref-time-bar-c" style="width:20%"></div></div>
+              <div class="ref-time-val">~1 hr</div>
+            </div>
+            <div class="ref-time-desc">Playing through each level, finding bugs (guards walking through floors, unreachable platforms, camera drift), describing them to Claude, and verifying fixes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="ref-section">
+        <div class="ref-sec-num">05</div>
+        <div class="ref-sec-content">
+          <h2 class="ref-h2">Personal Reflection</h2>
+          <p>Going into this project I assumed that using an AI coding assistant would mean I could just describe what I wanted and the finished product would appear almost instantly. That turned out not to be the case. Building with AI is genuinely a skill of its own. I had to learn how to describe a problem clearly enough for Claude to understand it, how to read the output and spot when something looked wrong even if I couldn't fully explain why, and how to decide which suggestions to accept and which to push back on. There were many moments where I had to actually think carefully about the structure of the game — how platforms are positioned, how guard patrol ranges work, how the camera should follow the player — and no amount of asking Claude to "just fix it" replaced the need for me to understand what I was asking for. AI makes you faster, but it does not make the thinking disappear.</p>
+          <p>That said, I genuinely learned more from this project than I expected to. I now understand the basics of how version control works and why it matters — being able to roll back a broken change, see a history of every decision, and publish a live website from a git repository felt like a real skill. I also developed a better intuition for how to communicate with an AI tool: vague prompts produce vague results, and being specific — describing the exact behaviour I wanted, the exact bug I was seeing, or the exact layout I had in mind — made a measurable difference in the quality of what came back.</p>
+          <p>One of the most unexpected outcomes of this project is that the skills I picked up feel genuinely useful beyond the assignment itself. I have already started using GitHub for other small personal projects, and I feel much more confident about the idea of building tools to make my daily life easier. Knowing that I can describe something I want, work with an AI to build it, and publish it online for free has opened up a completely different way of thinking about what is possible.</p>
+          <p>If I am being completely honest, the thing that surprised me most was how much time the setup consumed. I had imagined I would spend most of my five hours on the creative work — designing levels, writing the story text, tweaking how the game looked. Instead, the first two and a half hours were almost entirely spent figuring out GitHub: what a repository is, what "pushing" means, why Pages was not deploying, and why git was rejecting my first commit. It was frustrating at the time, but looking back, I think that experience is probably the most realistic part of the whole project. Any professional developer will tell you that getting the environment right before you can build anything is always harder than it looks — and now I know that from first-hand experience.</p>
+          <div class="ref-quote-block" style="margin-top:28px">
+            <div class="ref-quote-label">— Key Takeaway —</div>
+            <p style="font-style:italic;font-size:1.05rem">"It is not as easy building with AI as I thought it would be — but I have genuinely learned a lot. Most of the time went into setting everything up, and that alone taught me more about how software is actually built than any lesson could."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-footer">
+        <button class="btn" onclick="showScreen('s-title')" style="margin-top:8px">▶ Play Thieves' Gambit</button>
+        <p style="margin-top:16px;font-size:.75rem;color:var(--text-dim)">Built with Claude AI · Hosted on GitHub Pages · Inspired by Kayvion Lewis</p>
+      </div>
+
+    </div><!-- /ref-body -->
+  </div>
+
   <!-- TITLE -->
-  <div id="s-title" class="screen active">
+  <div id="s-title" class="screen">
     <div class="eyebrow">The Organization Presents</div>
     <h1>THIEVES'<br>GAMBIT</h1>
     <div class="ornament">— ✦ —</div>
@@ -1295,7 +1542,7 @@ function fullReset() {
   G.running = false; G.paused = false;
   G.devroeShown = false; G.devroeUsed = false;
   showDevroeCard(false);
-  showScreen('s-title');
+  showScreen('s-landing');
 }
 
 // ═══════════════════════════════════════════════
